@@ -3,10 +3,15 @@ import os
 import sys
 from datetime import time as dt_time
 from zoneinfo import ZoneInfo
+from datetime import timezone, timedelta
 from pathlib import Path
-from dotenv import load_dotenv
-
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    # dotenv not installed in this environment — continue with environment variables
+    def load_dotenv():
+        return None
 
 # Custom exceptions
 class ConfigurationError(Exception):
@@ -78,7 +83,11 @@ class Config:
     # ===========================
     # TIME WINDOWS (IST)
     # ===========================
-    TZ = ZoneInfo("Asia/Kolkata")
+    try:
+        TZ = ZoneInfo("Asia/Kolkata")
+    except Exception:
+        # tzdata not available in this environment; fallback to fixed-offset IST
+        TZ = timezone(timedelta(hours=5, minutes=30))
     PHASE0_START = dt_time(9, 15, 50)
     PHASE0_END = dt_time(9, 16, 10)
     PHASE1_START = dt_time(9, 16, 15)
@@ -189,6 +198,8 @@ class Config:
     KILL_SWITCH_ENABLED = os.getenv("KILL_SWITCH_ENABLED", "false").lower() == "true"  # Manual kill switch
     NO_NEW_TRADES = os.getenv("NO_NEW_TRADES", "false").lower() == "true"  # Block new trade entries
     EMERGENCY_EXIT_ALL = os.getenv("EMERGENCY_EXIT_ALL", "false").lower() == "true"  # Exit all positions immediately
+    # File-based emergency stop flag (presence of file triggers emergency flatten)
+    EMERGENCY_STOP_FILE = BASE_DIR / os.getenv("EMERGENCY_STOP_FILE", "EMERGENCY_STOP.flag")
 
     # ===========================
     # TRAILING STOP-LOSS (SELL LEGS ONLY)

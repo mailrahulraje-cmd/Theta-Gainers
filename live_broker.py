@@ -95,8 +95,18 @@ class LiveBroker:
         # Position reconciliation
         self.last_reconciliation = None
         self.reconciliation_thread = None
+        # Startup reconciliation completed flag
+        self._startup_reconciled = False
+        # Partial-fill block info
+        self._partial_fill_block = False
+        self._partial_fill_info = None
+        # Emergency stop active
+        self._emergency_active = False
         if Config.ENABLE_POSITION_RECONCILIATION:
             self._start_reconciliation_thread()
+
+        # Start emergency file monitor thread (lightweight)
+        self._start_emergency_monitor()
         
         # CRITICAL: Initialize execution gateway for centralized safety
         self.gateway = get_execution_gateway()
@@ -138,6 +148,13 @@ class LiveBroker:
             
             # Sync with broker positions
             self._sync_positions_from_broker()
+            # Mark startup reconciliation as done - broker is now source-of-truth
+            try:
+                self._startup_reconciled = True
+                self.state.set('startup_reconciled', True)
+                logger.info(" Startup position reconciliation complete - broker is source-of-truth")
+            except Exception:
+                pass
             
         except Exception as e:
             logger.exception(f"Failed to restore positions: {e}")
@@ -197,6 +214,82 @@ class LiveBroker:
         self.reconciliation_thread = threading.Thread(target=reconciliation_loop, daemon=True)
         self.reconciliation_thread.start()
         logger.info(" Position reconciliation thread started")
+
+    def _start_emergency_monitor(self):
+        """Start a lightweight thread that watches for the emergency stop file or config flag."""
+        def monitor_loop():
+            while True:
+                try:
+                    # If ENV-level emergency requested or file exists, trigger emergency handling
+                    if Config.EMERGENCY_EXIT_ALL or (hasattr(Config, 'EMERGENCY_STOP_FILE') and Config.EMERGENCY_STOP_FILE and os.path.exists(str(Config.EMERGENCY_STOP_FILE))):
+                        if not self._emergency_active:
+                            logger.critical(" Emergency stop detected - initiating flatten and disabling new entries")
+                            self._emergency_active = True
+                            try:
+                                self._handle_emergency()
+                            except Exception:
+                                logger.exception("Error while handling emergency stop")
+                    time.sleep(2.0)
+                except Exception:
+                    logger.exception("Emergency monitor loop error")
+                    time.sleep(2.0)
+
+        t = threading.Thread(target=monitor_loop, daemon=True)
+        t.start()
+        logger.info(" Emergency monitor thread started")
+
+    def _handle_emergency(self):
+        """Perform emergency flattening and set state to block further entries."""
+        try:
+            # Mark circuit breaker and save state
+            self.circuit_breaker_triggered = True
+            self.state.set('emergency_stop', True)
+            if self.notifier:
+                self.notifier.send_trade_log("EMERGENCY STOP: Flattening all positions and blocking new entries")
+
+            # Execute flatten: iterate over current positions and place opposite orders
+            self._emergency_flatten()
+            # Persist that emergency is active
+            try:
+                self.state.set('emergency_active', True)
+            except Exception:
+                pass
+            logger.critical(" Emergency flatten complete - trading disabled")
+        except Exception as e:
+            logger.exception(f"Emergency handling failed: {e}")
+
+    def _emergency_flatten(self):
+        """Close all open positions by placing opposite market orders."""
+        try:
+            with self.order_lock:
+                tokens = list(self.positions.keys())
+
+            for token in tokens:
+                pos = self.positions.get(token, {})
+                qty = int(pos.get('qty', 0))
+                if qty == 0:
+                    continue
+                side = 'SELL' if qty > 0 else 'BUY'
+                close_qty = abs(qty)
+                symbol = pos.get('symbol')
+                logger.info(f" Emergency flatten: {token} - {side} {close_qty}")
+                try:
+                    # Place opposite market order via direct execution (bypass place_order guards)
+                    res = self._execute_order_with_retry(side, token, symbol, close_qty, pos.get('last_price', 0.0), 'EMERGENCY_FLATTEN')
+                    logger.info(f" Emergency flatten order result for {token}: {res.get('status')}")
+                except Exception:
+                    logger.exception(f"Failed to flatten {token}")
+                # Update local tracking regardless
+                try:
+                    with self.order_lock:
+                        if token in self.positions:
+                            self.positions[token]['qty'] = 0
+                    self._save_positions()
+                except Exception:
+                    logger.exception("Failed to update positions during emergency flatten")
+
+        except Exception as e:
+            logger.exception(f"Emergency flatten failed: {e}")
     
     def _reconcile_positions(self):
         """Reconcile local positions with broker positions"""
@@ -270,6 +363,22 @@ class LiveBroker:
                     logger.info(" Reconciliation: All positions match")
             
             self.last_reconciliation = ist_now()
+            # If partial-fill block exists, check whether reconciliation resolved it
+            try:
+                pf = self._partial_fill_info
+                if pf and pf.get('token'):
+                    token = str(pf.get('token'))
+                    with self.order_lock:
+                        local_qty = self.positions.get(token, {}).get('qty', 0)
+                    # If broker/local qty now reflects the filled amount (i.e., no pending partial), clear block
+                    if local_qty == pf.get('expected_qty', local_qty):
+                        self._partial_fill_block = False
+                        self._partial_fill_info = None
+                        self.state.set('partial_fill', None)
+                        if self.notifier:
+                            self.notifier.send_trade_log(f" Partial-fill resolved for {token}; normal trading resumed.")
+            except Exception:
+                logger.exception("Error while checking partial-fill resolution during reconciliation")
             
         except Exception as e:
             logger.exception(f"Failed to reconcile positions: {e}")
@@ -394,11 +503,76 @@ class LiveBroker:
                 'qty': qty,
                 'price': price
             }
+
+            # STARTUP RECONCILIATION GATING: ensure broker is source-of-truth before accepting live orders
+            if not self._startup_reconciled:
+                logger.error("Order rejected: position reconciliation with broker not completed yet")
+                return {
+                    'order_id': str(uuid.uuid4()),
+                    'status': 'REJECTED',
+                    'message': 'Position reconciliation pending - try again shortly',
+                    'timestamp': ist_now().isoformat()
+                }
+
+            # PARTIAL-FILL SAFETY: if there is a partial-fill, block any new orders that would increase exposure for that token
+            if self._partial_fill_block and self._partial_fill_info:
+                pf_token = str(self._partial_fill_info.get('token'))
+                if pf_token == str(token):
+                    # compute existing qty and projected qty if this order executes
+                    existing_qty = self.positions.get(str(token), {}).get('qty', 0)
+                    projected_qty = existing_qty + (qty if side == 'BUY' else -qty)
+                    if abs(projected_qty) > abs(existing_qty):
+                        msg = f"Partial fill active for {token}; blocking orders that increase exposure until resolved"
+                        logger.warning(msg)
+                        if self.notifier:
+                            self.notifier.send_trade_log(msg)
+                        return {
+                            'order_id': str(uuid.uuid4()),
+                            'status': 'REJECTED',
+                            'message': 'Partial fill active - resolve before new entries',
+                            'timestamp': ist_now().isoformat()
+                        }
+
+            # DUPLICATE/IDEMPOTENCY CHECK: consult broker order book for similar pending orders
+            try:
+                if self._has_similar_pending_order(side, token, qty):
+                    logger.warning(" Duplicate order detected - skipping placement")
+                    return {
+                        'order_id': str(uuid.uuid4()),
+                        'status': 'REJECTED',
+                        'message': 'Duplicate pending order exists - placement skipped',
+                        'timestamp': ist_now().isoformat()
+                    }
+            except Exception:
+                logger.exception("Error while checking for duplicate orders; continuing placement")
         
         # Place order with retries and status verification
         order_result = self._execute_order_with_retry(
             side, token, symbol, qty, price, tag
         )
+
+        # If order was partially filled, set a protected flag and notify (block increasing exposure)
+        try:
+            if order_result.get('status') and order_result['status'].upper() == 'PARTIALLY_FILLED':
+                pf_info = {
+                    'token': str(token),
+                    'side': side,
+                    'requested_qty': qty,
+                    'filled_qty': int(order_result.get('filled_qty', 0)),
+                    'expected_qty': int(order_result.get('filled_qty', 0))
+                }
+                self._partial_fill_block = True
+                self._partial_fill_info = pf_info
+                try:
+                    self.state.set('partial_fill', pf_info)
+                except Exception:
+                    pass
+                msg = f" Partial fill detected for {token}: filled {pf_info['filled_qty']} of {pf_info['requested_qty']}. New entries that increase exposure are blocked until reconciliation."
+                logger.warning(msg)
+                if self.notifier:
+                    self.notifier.send_trade_log(msg)
+        except Exception:
+            logger.exception("Error handling partial-fill post-order")
         
         # ==================== TIMING VALIDATION ====================
         if Config.ENABLE_TIMEOUT_PROTECTION:
@@ -898,14 +1072,39 @@ class LiveBroker:
                 
             except Exception as e:
                 logger.exception(f"Error polling order status: {e}")
-                time.sleep(poll_interval)
-        
+
         # Timeout
         logger.warning(f" Order status polling timeout for {exchange_order_id}")
         return {
             'status': 'PENDING',
             'message': 'Status polling timeout - order may still be pending'
         }
+
+    def _has_similar_pending_order(self, side: str, token: str, qty: int) -> bool:
+        """Check broker order book for similar pending orders to avoid duplicate placements.
+
+        Conservative check: any open order for same token and side with >= requested qty is considered duplicate.
+        """
+        try:
+            response = self.api.orderBook()
+            if not response or not response.get('status'):
+                return False
+
+            orders = response.get('data', [])
+            for order in orders:
+                try:
+                    if str(order.get('symboltoken')) == str(token):
+                        status = order.get('orderstatus', '').lower()
+                        if status in ['open', 'pending', 'trigger pending']:
+                            o_side = order.get('transactiontype', '').upper()
+                            o_qty = int(order.get('quantity') or order.get('filledquantity') or 0)
+                            if o_side == side and o_qty >= qty:
+                                return True
+                except Exception:
+                    continue
+        except Exception as e:
+            logger.exception(f"Failed to fetch order book for duplicate check: {e}")
+        return False
     
     def _apply_fill(self, order: Dict[str, Any]):
         """Update positions based on order fill"""
