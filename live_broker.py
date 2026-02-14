@@ -20,6 +20,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 from config import Config, EXCHANGE_TYPE_MAP
 from utils.logger import logger, trade_logger
+from utils.order_journal import get_order_journal
+from utils.rate_limiter import get_global_rate_limiter
 from contract import BrokerProtocol, OrderDict, FeedProtocol
 from core.execution_gateway import get_execution_gateway
 
@@ -102,11 +104,24 @@ class LiveBroker:
         self._partial_fill_info = None
         # Emergency stop active
         self._emergency_active = False
+        
+        # API Rate Limiting (enforce API_RATE_LIMIT_PER_SECOND)
+        self._last_api_call_time = time.monotonic()
+        self._min_api_interval = 1.0 / Config.API_RATE_LIMIT_PER_SECOND if Config.API_RATE_LIMIT_PER_SECOND > 0 else 0.0
+        self._api_limit_lock = threading.Lock()
+        
+        # Global rate limiter for coordinated API call blocking
+        self.rate_limiter = get_global_rate_limiter(Config.API_RATE_LIMIT_PER_SECOND)
+        
         if Config.ENABLE_POSITION_RECONCILIATION:
             self._start_reconciliation_thread()
 
         # Start emergency file monitor thread (lightweight)
         self._start_emergency_monitor()
+        
+        # Global execution lock for thread-safe order/position operations
+        # Wraps: order placement, flatten operations, reconciliation updates, emergency handlers
+        self._execution_lock = threading.Lock()
         
         # CRITICAL: Initialize execution gateway for centralized safety
         self.gateway = get_execution_gateway()
@@ -161,19 +176,23 @@ class LiveBroker:
     
     def _sync_positions_from_broker(self):
         """Sync positions from broker API"""
+        def _fetch_positions():
+            return self.api.position()
+
+        # Use safe API call wrapper for network robustness
         try:
-            response = self.api.position()
+            response = self._safe_api_call(_fetch_positions, retries=Config.API_CALL_MAX_RETRIES, delay=Config.API_CALL_RETRY_DELAY)
             if response and response.get('status'):
                 broker_positions = response.get('data', [])
                 logger.info(f" Fetched {len(broker_positions)} positions from broker")
-                
+
                 # Update local position tracking
                 for pos in broker_positions:
                     token = str(pos.get('symboltoken'))
                     qty = int(pos.get('netqty', 0))
                     avg_price = float(pos.get('avgprice', 0.0))
                     ltp = float(pos.get('ltp', avg_price))
-                    
+
                     if qty != 0:
                         self.positions[token] = {
                             'qty': qty,
@@ -186,11 +205,11 @@ class LiveBroker:
                         logger.info(
                             f"    Synced {token}: {qty} @ {avg_price:.2f}"
                         )
-                
+
                 self._save_positions()
             else:
                 logger.warning(" Failed to fetch positions from broker")
-                
+
         except Exception as e:
             logger.exception(f"Failed to sync positions from broker: {e}")
     
@@ -229,7 +248,7 @@ class LiveBroker:
                                 self._handle_emergency()
                             except Exception:
                                 logger.exception("Error while handling emergency stop")
-                    time.sleep(2.0)
+                        time.sleep(1.0)
                 except Exception:
                     logger.exception("Emergency monitor loop error")
                     time.sleep(2.0)
@@ -240,23 +259,36 @@ class LiveBroker:
 
     def _handle_emergency(self):
         """Perform emergency flattening and set state to block further entries."""
-        try:
-            # Mark circuit breaker and save state
-            self.circuit_breaker_triggered = True
-            self.state.set('emergency_stop', True)
-            if self.notifier:
-                self.notifier.send_trade_log("EMERGENCY STOP: Flattening all positions and blocking new entries")
-
-            # Execute flatten: iterate over current positions and place opposite orders
-            self._emergency_flatten()
-            # Persist that emergency is active
+        with self._execution_lock:
             try:
-                self.state.set('emergency_active', True)
-            except Exception:
-                pass
-            logger.critical(" Emergency flatten complete - trading disabled")
-        except Exception as e:
-            logger.exception(f"Emergency handling failed: {e}")
+                # Mark circuit breaker and save state
+                self.circuit_breaker_triggered = True
+                self.state.set('emergency_stop', True)
+
+                # Notify non-blocking to avoid holding execution lock during network I/O
+                if self.notifier:
+                    try:
+                        threading.Thread(
+                            target=self.notifier.send_trade_log,
+                            args=("EMERGENCY STOP: Flattening all positions and blocking new entries",),
+                            daemon=True
+                        ).start()
+                    except Exception:
+                        logger.exception("Failed to spawn emergency notifier thread")
+
+                # Execute flatten: iterate over current positions and place opposite orders
+                self._emergency_flatten()
+
+                # Persist that emergency is active
+                try:
+                    self.state.set('emergency_active', True)
+                except Exception:
+                    pass
+
+                logger.critical(" Emergency flatten complete - trading disabled")
+
+            except Exception as e:
+                logger.exception(f"Emergency handling failed: {e}")
 
     def _emergency_flatten(self):
         """Close all open positions by placing opposite market orders."""
@@ -279,12 +311,13 @@ class LiveBroker:
                     logger.info(f" Emergency flatten order result for {token}: {res.get('status')}")
                 except Exception:
                     logger.exception(f"Failed to flatten {token}")
-                # Update local tracking regardless
+                # Update local tracking regardless (wrapped in execution lock)
                 try:
-                    with self.order_lock:
-                        if token in self.positions:
-                            self.positions[token]['qty'] = 0
-                    self._save_positions()
+                    with self._execution_lock:
+                        with self.order_lock:
+                            if token in self.positions:
+                                self.positions[token]['qty'] = 0
+                        self._save_positions()
                 except Exception:
                     logger.exception("Failed to update positions during emergency flatten")
 
@@ -296,7 +329,8 @@ class LiveBroker:
         try:
             logger.info(" Reconciling positions with broker...")
             
-            response = self.api.position()
+            # Fetch via safe API call wrapper
+            response = self._safe_api_call(self.api.position, retries=Config.API_CALL_MAX_RETRIES, delay=Config.API_CALL_RETRY_DELAY)
             if not response or not response.get('status'):
                 logger.warning(" Reconciliation: Failed to fetch broker positions")
                 return
@@ -356,9 +390,14 @@ class LiveBroker:
                 if discrepancies:
                     self._save_positions()
                     if self.notifier:
-                        self.notifier.send_trade_log(
-                            f" Position Reconciliation: {len(discrepancies)} discrepancies found"
-                        )
+                        try:
+                            threading.Thread(
+                                target=self.notifier.send_trade_log,
+                                args=(f" Position Reconciliation: {len(discrepancies)} discrepancies found",),
+                                daemon=True
+                            ).start()
+                        except Exception:
+                            logger.exception("Failed to spawn reconciliation notifier thread")
                 else:
                     logger.info(" Reconciliation: All positions match")
             
@@ -376,7 +415,10 @@ class LiveBroker:
                         self._partial_fill_info = None
                         self.state.set('partial_fill', None)
                         if self.notifier:
-                            self.notifier.send_trade_log(f" Partial-fill resolved for {token}; normal trading resumed.")
+                            try:
+                                threading.Thread(target=self.notifier.send_trade_log, args=(f" Partial-fill resolved for {token}; normal trading resumed.",), daemon=True).start()
+                            except Exception:
+                                logger.exception("Failed to spawn partial-fill resolved notifier thread")
             except Exception:
                 logger.exception("Error while checking partial-fill resolution during reconciliation")
             
@@ -422,7 +464,10 @@ class LiveBroker:
         if self.circuit_breaker_triggered:
             logger.error(" Circuit breaker active - order rejected")
             if self.notifier:
-                self.notifier.send_trade_log(" Order rejected: Circuit breaker active")
+                try:
+                    threading.Thread(target=self.notifier.send_trade_log, args=(" Order rejected: Circuit breaker active",), daemon=True).start()
+                except Exception:
+                    logger.exception("Failed to spawn circuit-breaker notifier thread")
             return {
                 'order_id': str(uuid.uuid4()),
                 'status': 'REJECTED',
@@ -453,7 +498,10 @@ class LiveBroker:
         if not allowed:
             logger.error(f" Order REJECTED by ExecutionGateway: {reason}")
             if self.notifier:
-                self.notifier.send_trade_log(f" Order rejected: {reason}")
+                try:
+                    threading.Thread(target=self.notifier.send_trade_log, args=(f" Order rejected: {reason}",), daemon=True).start()
+                except Exception:
+                    logger.exception("Failed to spawn execution-gateway notifier thread")
             return {
                 'order_id': str(uuid.uuid4()),
                 'status': 'REJECTED',
@@ -492,7 +540,10 @@ class LiveBroker:
         if not passed:
             logger.error(f" Risk limit check failed: {limit_msg}")
             if self.notifier:
-                self.notifier.send_trade_log(f" Risk limit: {limit_msg}")
+                try:
+                    threading.Thread(target=self.notifier.send_trade_log, args=(f" Risk limit: {limit_msg}",), daemon=True).start()
+                except Exception:
+                    logger.exception("Failed to spawn risk-limit notifier thread")
             return {
                 'order_id': str(uuid.uuid4()),
                 'status': 'REJECTED',
@@ -525,7 +576,10 @@ class LiveBroker:
                         msg = f"Partial fill active for {token}; blocking orders that increase exposure until resolved"
                         logger.warning(msg)
                         if self.notifier:
-                            self.notifier.send_trade_log(msg)
+                            try:
+                                threading.Thread(target=self.notifier.send_trade_log, args=(msg,), daemon=True).start()
+                            except Exception:
+                                logger.exception("Failed to spawn partial-fill active notifier thread")
                         return {
                             'order_id': str(uuid.uuid4()),
                             'status': 'REJECTED',
@@ -551,26 +605,13 @@ class LiveBroker:
             side, token, symbol, qty, price, tag
         )
 
-        # If order was partially filled, set a protected flag and notify (block increasing exposure)
+        # If order was partially filled, centralize handling
         try:
             if order_result.get('status') and order_result['status'].upper() == 'PARTIALLY_FILLED':
-                pf_info = {
-                    'token': str(token),
-                    'side': side,
-                    'requested_qty': qty,
-                    'filled_qty': int(order_result.get('filled_qty', 0)),
-                    'expected_qty': int(order_result.get('filled_qty', 0))
-                }
-                self._partial_fill_block = True
-                self._partial_fill_info = pf_info
                 try:
-                    self.state.set('partial_fill', pf_info)
+                    self._handle_partial_fill(order_result, token, side, qty)
                 except Exception:
-                    pass
-                msg = f" Partial fill detected for {token}: filled {pf_info['filled_qty']} of {pf_info['requested_qty']}. New entries that increase exposure are blocked until reconciliation."
-                logger.warning(msg)
-                if self.notifier:
-                    self.notifier.send_trade_log(msg)
+                    logger.exception("Error in _handle_partial_fill post-order")
         except Exception:
             logger.exception("Error handling partial-fill post-order")
         
@@ -583,16 +624,18 @@ class LiveBroker:
                     f"(threshold: {Config.MAX_ORDER_PLACEMENT_TIME}s)"
                 )
                 if self.notifier:
-                    self.notifier.send_trade_log(
-                        f" Slow order: {order_duration:.2f}s for {tag}"
-                    )
+                    try:
+                        threading.Thread(target=self.notifier.send_trade_log, args=(f" Slow order: {order_duration:.2f}s for {tag}",), daemon=True).start()
+                    except Exception:
+                        logger.exception("Failed to spawn slow-order notifier thread")
         
-        # Log and save
-        self._log_order(order_result, tag)
-        
-        # Update positions if filled
-        if order_result['status'] == 'FILLED':
-            self._apply_fill(order_result)
+        # Log and save (with execution lock for thread-safe state mutation)
+        with self._execution_lock:
+            self._log_order(order_result, tag)
+            
+            # Update positions if filled
+            if order_result['status'] == 'FILLED':
+                self._apply_fill(order_result)
         
         # Notify
         self._notify_order(order_result, tag)
@@ -701,7 +744,8 @@ class LiveBroker:
                         try:
                             expiry_date = datetime.strptime(expiry_str, fmt).date()
                             break
-                        except:
+                        except Exception as e:
+                            logger.exception(f"Failed to parse expiry format '{fmt}' for '{expiry_str}': {e}")
                             continue
                     
                     if expiry_date and expiry_date < ist_now().date():
@@ -740,7 +784,8 @@ class LiveBroker:
                             f"Price {price} deviates {deviation:.1f}% from LTP {ltp} "
                             f"(max {Config.PRICE_TOLERANCE_PERCENT}%)"
                         )
-            except:
+            except Exception as e:
+                logger.exception(f"Price validation LTP fetch failed for token {token}: {e}")
                 pass
         
         # 8. Check market hours (IST 9:15 AM to 3:30 PM)
@@ -848,7 +893,10 @@ class LiveBroker:
             logger.critical(f" CIRCUIT BREAKER TRIGGERED: {reason}")
             
             if self.notifier:
-                self.notifier.send_trade_log(f" CIRCUIT BREAKER\n\n{reason}")
+                try:
+                    threading.Thread(target=self.notifier.send_trade_log, args=(f" CIRCUIT BREAKER\n\n{reason}",), daemon=True).start()
+                except Exception:
+                    logger.exception("Failed to spawn circuit-breaker notifier thread")
             
             # Save state
             self.state.set('circuit_breaker_triggered', True)
@@ -892,40 +940,105 @@ class LiveBroker:
                     order_params['price'] = f"{limit_price:.2f}"
                 
                 # Place order
-                response = self.api.placeOrder(order_params)
-                
+                # Use safe API call wrapper when placing orders
+                response = None
+                try:
+                    response = self._safe_api_call(lambda: self.api.placeOrder(order_params), retries=1, delay=0)
+                except Exception:
+                    # _safe_api_call will raise only if fatal; we handle below
+                    response = None
+
                 if not response or not response.get('status'):
-                    error_msg = response.get('message', 'Unknown error') if response else 'No response'
+                    # If we got a network exception or no response, attempt to check if order exists at broker
+                    match = None
+                    try:
+                        match = self._find_matching_order(side, token, qty)
+                    except Exception:
+                        match = None
+
+                    if match:
+                        # Found matching pending order on broker — treat as placed
+                        exchange_order_id = match.get('orderid') or match.get('order_id')
+                        logger.info(f" Order placement uncertain but matching order found at broker: {exchange_order_id}")
+                        final_status = self._poll_order_status(exchange_order_id, timeout=30)
+                        if final_status['status'] == 'FILLED':
+                            return {
+                                'order_id': order_id,
+                                'exchange_order_id': exchange_order_id,
+                                'status': 'FILLED',
+                                'message': 'Order filled (detected via orderBook)',
+                                'timestamp': ist_now().isoformat(),
+                                'side': side,
+                                'token': token,
+                                'symbol': symbol,
+                                'qty': qty,
+                                'price': final_status.get('fill_price', price),
+                                'tag': tag
+                            }
+                        elif final_status['status'] == 'REJECTED':
+                            return {
+                                'order_id': order_id,
+                                'exchange_order_id': exchange_order_id,
+                                'status': 'REJECTED',
+                                'message': final_status.get('message', 'Order rejected by exchange'),
+                                'timestamp': ist_now().isoformat(),
+                                'side': side,
+                                'token': token,
+                                'symbol': symbol,
+                                'qty': qty,
+                                'price': price,
+                                'tag': tag
+                            }
+                        elif final_status['status'] == 'PARTIALLY_FILLED':
+                            # Handle partial fills conservatively
+                            try:
+                                self._handle_partial_fill(final_status, token, side, qty)
+                            except Exception:
+                                logger.exception("Failed to handle partial fill (matching order branch)")
+                            return {
+                                'order_id': order_id,
+                                'exchange_order_id': exchange_order_id,
+                                'status': 'PARTIALLY_FILLED',
+                                'message': final_status.get('message', 'Order partially filled'),
+                                'filled_qty': int(final_status.get('filled_qty', 0)),
+                                'timestamp': ist_now().isoformat(),
+                                'side': side,
+                                'token': token,
+                                'symbol': symbol,
+                                'qty': qty,
+                                'price': price,
+                                'tag': tag
+                            }
+                        else:
+                            return {
+                                'order_id': order_id,
+                                'exchange_order_id': exchange_order_id,
+                                'status': final_status['status'],
+                                'message': final_status.get('message', 'Order status unknown'),
+                                'timestamp': ist_now().isoformat(),
+                                'side': side,
+                                'token': token,
+                                'symbol': symbol,
+                                'qty': qty,
+                                'price': price,
+                                'tag': tag
+                            }
+
+                    # If no matching order found, treat as transient and decide to retry or fail
+                    error_msg = 'No response from broker (network or transient error)'
                     logger.error(f" Order placement failed: {error_msg}")
-                    
-                    # Check if we should retry
-                    if 'insufficient' in error_msg.lower() or 'margin' in error_msg.lower():
-                        # Margin error - don't retry, trigger circuit breaker
-                        self._trigger_circuit_breaker(f"Insufficient margin: {error_msg}")
-                        return {
-                            'order_id': order_id,
-                            'exchange_order_id': None,
-                            'status': 'REJECTED',
-                            'message': error_msg,
-                            'timestamp': ist_now().isoformat(),
-                            'side': side,
-                            'token': token,
-                            'symbol': symbol,
-                            'qty': qty,
-                            'price': price,
-                            'tag': tag
-                        }
-                    
-                    # Network/temporary error - retry
+
                     if attempt < Config.ORDER_MAX_RETRIES - 1:
                         time.sleep(Config.ORDER_RETRY_DELAY)
                         continue
                     else:
+                        # Could not guarantee idempotency — fail safe: trigger circuit breaker and block new entries
+                        self._trigger_circuit_breaker("Order placement uncertainty due to network failures")
                         return {
                             'order_id': order_id,
                             'exchange_order_id': None,
-                            'status': 'REJECTED',
-                            'message': error_msg,
+                            'status': 'ERROR',
+                            'message': 'Order placement uncertain - network failures; trading halted',
                             'timestamp': ist_now().isoformat(),
                             'side': side,
                             'token': token,
@@ -974,8 +1087,27 @@ class LiveBroker:
                         'price': price,
                         'tag': tag
                     }
+                elif final_status['status'] == 'PARTIALLY_FILLED':
+                    try:
+                        self._handle_partial_fill(final_status, token, side, qty)
+                    except Exception:
+                        logger.exception("Failed to handle partial fill (post-placement)")
+                    return {
+                        'order_id': order_id,
+                        'exchange_order_id': exchange_order_id,
+                        'status': 'PARTIALLY_FILLED',
+                        'message': final_status.get('message', 'Order partially filled'),
+                        'filled_qty': int(final_status.get('filled_qty', 0)),
+                        'timestamp': ist_now().isoformat(),
+                        'side': side,
+                        'token': token,
+                        'symbol': symbol,
+                        'qty': qty,
+                        'price': price,
+                        'tag': tag
+                    }
                 else:
-                    # PENDING or PARTIALLY_FILLED
+                    # PENDING or unknown
                     logger.warning(
                         f" Order {final_status['status']}: {final_status.get('message')}"
                     )
@@ -1035,50 +1167,110 @@ class LiveBroker:
         Returns:
             dict with 'status', 'message', 'fill_price'
         """
-        start_time = time.time()
         poll_interval = 0.5  # 500ms
-        
-        while time.time() - start_time < timeout:
+        max_polls = max(10, int(timeout / poll_interval))
+
+        for attempt in range(max_polls):
             try:
-                # Fetch order book
-                response = self.api.orderBook()
-                
-                if response and response.get('status'):
-                    orders = response.get('data', [])
-                    
-                    # Find our order
-                    for order in orders:
-                        if order.get('orderid') == exchange_order_id:
-                            status = order.get('orderstatus', '').lower()
-                            
-                            if status in ['complete', 'executed']:
+                response = self._safe_api_call(self.api.orderBook, retries=Config.API_CALL_MAX_RETRIES, delay=Config.API_CALL_RETRY_DELAY)
+
+                if not response or not response.get('status'):
+                    logger.warning(f"Order status poll failed (attempt {attempt+1}/{max_polls})")
+                    time.sleep(poll_interval)
+                    continue
+
+                orders = response.get('data', [])
+                for order in orders:
+                    try:
+                        if str(order.get('orderid') or order.get('order_id')) == str(exchange_order_id):
+                            status_raw = str(order.get('orderstatus') or order.get('status') or '').lower()
+
+                            # Terminal states
+                            if any(k in status_raw for k in ['complete', 'executed', 'filled']):
                                 return {
                                     'status': 'FILLED',
                                     'message': 'Order filled',
-                                    'fill_price': float(order.get('averageprice', 0))
+                                    'fill_price': float(order.get('averageprice') or order.get('fill_price') or 0)
                                 }
-                            elif status in ['rejected', 'cancelled']:
+
+                            if any(k in status_raw for k in ['rejected', 'cancelled', 'cancelled by user']):
                                 return {
                                     'status': 'REJECTED',
                                     'message': order.get('text', 'Order rejected')
                                 }
-                            elif status in ['open', 'pending', 'trigger pending']:
-                                # Order still pending, continue polling
-                                pass
-                            else:
-                                logger.warning(f"Unknown order status: {status}")
-                
-                time.sleep(poll_interval)
-                
-            except Exception as e:
-                logger.exception(f"Error polling order status: {e}")
 
-        # Timeout
-        logger.warning(f" Order status polling timeout for {exchange_order_id}")
-        return {
-            'status': 'PENDING',
-            'message': 'Status polling timeout - order may still be pending'
-        }
+                            # Partial fills
+                            if any(k in status_raw for k in ['partial', 'partially']):
+                                filled_qty = int(order.get('filledquantity') or order.get('filled_qty') or order.get('filled') or 0)
+                                return {
+                                    'status': 'PARTIALLY_FILLED',
+                                    'message': 'Order partially filled',
+                                    'filled_qty': filled_qty,
+                                    'raw': order
+                                }
+
+                            # Pending/open - continue polling
+                    except Exception:
+                        continue
+
+                time.sleep(poll_interval)
+
+            except Exception as e:
+                logger.exception(f"Order polling error (attempt {attempt+1}): {e}")
+                time.sleep(poll_interval)
+
+        # Max polls exceeded - critical situation
+        logger.critical(f"❌ Order {exchange_order_id} status unknown after {max_polls} polls")
+        raise Exception(f"Order status verification failed after {max_polls} attempts")
+
+    def _handle_partial_fill(self, order_result: Dict[str, Any], token: str, side: str, requested_qty: int):
+        """Comprehensive partial fill handling.
+
+        Sets internal flags, persists partial-fill info, and notifies trader.
+        This function intentionally does not attempt automatic complex fixes
+        (e.g., cancelling remaining quantity) — it records state and alerts
+        operators for manual or automated reconciliation later.
+        """
+        try:
+            filled_qty = int(order_result.get('filled_qty') or order_result.get('filledquantity') or order_result.get('filled') or 0)
+            remaining_qty = max(0, requested_qty - filled_qty)
+
+            logger.warning(
+                f"⚠️ PARTIAL FILL: {filled_qty}/{requested_qty} filled for {token}, {remaining_qty} remaining"
+            )
+
+            # Record partial-fill info and block new entries that would increase exposure
+            self._partial_fill_block = True
+            self._partial_fill_info = {
+                'token': str(token),
+                'side': side,
+                'requested': requested_qty,
+                'filled': filled_qty,
+                'remaining': remaining_qty,
+                'timestamp': time.time(),
+                'expected_qty': filled_qty
+            }
+
+            try:
+                self.state.set('partial_fill', self._partial_fill_info)
+            except Exception:
+                logger.exception("Failed to persist partial_fill state")
+
+            # Notify trader (non-blocking)
+            if self.notifier:
+                try:
+                    threading.Thread(
+                        target=self.notifier.send_trade_log,
+                        args=(
+                            f"⚠️ PARTIAL FILL ALERT\nToken: {token}\nFilled: {filled_qty}/{requested_qty}\nAction: Manual review required",
+                        ),
+                        daemon=True
+                    ).start()
+                except Exception:
+                    logger.exception("Failed to spawn partial-fill notifier thread")
+
+        except Exception as e:
+            logger.exception(f"_handle_partial_fill failed: {e}")
 
     def _has_similar_pending_order(self, side: str, token: str, qty: int) -> bool:
         """Check broker order book for similar pending orders to avoid duplicate placements.
@@ -1086,7 +1278,7 @@ class LiveBroker:
         Conservative check: any open order for same token and side with >= requested qty is considered duplicate.
         """
         try:
-            response = self.api.orderBook()
+            response = self._safe_api_call(self.api.orderBook, retries=Config.API_CALL_MAX_RETRIES, delay=Config.API_CALL_RETRY_DELAY)
             if not response or not response.get('status'):
                 return False
 
@@ -1105,6 +1297,72 @@ class LiveBroker:
         except Exception as e:
             logger.exception(f"Failed to fetch order book for duplicate check: {e}")
         return False
+
+    def _safe_api_call(self, func, retries: int = 3, delay: float = 1.0):
+        """Call `func()` with controlled retries on network errors.
+
+        This wrapper attempts to call the provided function up to `retries` times. If an exception
+        occurs it will wait `delay` seconds and retry. If all retries fail it raises the last exception.
+        Use this for non-destructive read calls and for detecting idempotent state; for write
+        operations we use additional verification against broker state to avoid duplicates.
+        
+        Enforces API_RATE_LIMIT_PER_SECOND to prevent API spamming.
+        """
+        # Enforce API rate limit using monotonic clock
+        self._enforce_api_rate_limit()
+
+        last_exc = None
+        for attempt in range(max(1, retries)):
+            try:
+                return func()
+            except Exception as e:
+                last_exc = e
+                # Exponential backoff for transient network issues
+                if attempt < max(0, retries - 1):
+                    backoff = delay * (2 ** attempt)
+                    logger.warning(f" API call attempt {attempt+1} failed: {e} - retrying in {backoff}s")
+                    time.sleep(backoff)
+                    continue
+                else:
+                    logger.exception(f"API call fatal after {attempt+1} attempts: {e}")
+                    raise
+    
+    def _enforce_api_rate_limit(self):
+        """Enforce API_RATE_LIMIT_PER_SECOND using monotonic clock"""
+        if self._min_api_interval <= 0:
+            return  # No rate limiting configured
+        
+        with self._api_limit_lock:
+            now = time.monotonic()
+            elapsed = now - self._last_api_call_time
+            if elapsed < self._min_api_interval:
+                sleep_time = self._min_api_interval - elapsed
+                if sleep_time > 0.001:  # Only sleep if meaningful (>1ms)
+                    logger.debug(f" API rate limit: sleeping {sleep_time:.3f}s")
+                    time.sleep(sleep_time)
+            self._last_api_call_time = time.monotonic()
+
+    def _find_matching_order(self, side: str, token: str, qty: int) -> Optional[Dict[str, Any]]:
+        """Return an order dict from broker orderBook that matches the token/side/qty criteria, or None."""
+        try:
+            response = self._safe_api_call(self.api.orderBook, retries=Config.API_CALL_MAX_RETRIES, delay=Config.API_CALL_RETRY_DELAY)
+            if not response or not response.get('status'):
+                return None
+            orders = response.get('data', [])
+            for order in orders:
+                try:
+                    if str(order.get('symboltoken')) == str(token):
+                        status = order.get('orderstatus', '').lower()
+                        if status in ['open', 'pending', 'trigger pending']:
+                            o_side = order.get('transactiontype', '').upper()
+                            o_qty = int(order.get('quantity') or order.get('filledquantity') or 0)
+                            if o_side == side and o_qty >= qty:
+                                return order
+                except Exception:
+                    continue
+        except Exception as e:
+            logger.exception(f"Failed to fetch order book for matching order: {e}")
+        return None
     
     def _apply_fill(self, order: Dict[str, Any]):
         """Update positions based on order fill"""
@@ -1280,7 +1538,8 @@ class LiveBroker:
                 ltp = None
                 try:
                     ltp = feed.get_ltp(token, check_freshness=False)
-                except:
+                except Exception as e:
+                    logger.exception(f"Failed to fetch LTP for token {token} in get_total_pnl: {e}")
                     pass
                 
                 if ltp is None:
@@ -1313,7 +1572,8 @@ class LiveBroker:
                 ltp = None
                 try:
                     ltp = feed.get_ltp(token, check_freshness=False)
-                except:
+                except Exception as e:
+                    logger.exception(f"Failed to fetch LTP for token {token} in get_unrealized_pnl: {e}")
                     pass
                 
                 if ltp is None:
@@ -1350,7 +1610,8 @@ class LiveBroker:
                 ltp = None
                 try:
                     ltp = feed.get_ltp(token, check_freshness=False)
-                except:
+                except Exception as e:
+                    logger.exception(f"Failed to fetch LTP for token {token} in get_pnl_breakdown: {e}")
                     pass
                 
                 if ltp is None:

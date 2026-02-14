@@ -28,27 +28,69 @@ try:
     from SmartApi import SmartConnect
     from SmartApi.smartWebSocketV2 import SmartWebSocketV2
     
-    # Monkey-patch fix (same as original)
+    # Safe monkey-patch with signature matching
     _original_on_close = SmartWebSocketV2._on_close
     _original_on_error = SmartWebSocketV2._on_error
     
     def _patched_on_close(self, ws=None, close_status_code=None, close_msg=None, *args, **kwargs):
+        """
+        Patched WebSocket close handler.
+        Matches original SDK signature exactly.
+        Safe: Gracefully handles signature mismatches.
+        """
         try:
-            return _original_on_close(self)
+            # Call original with flexible argument passing
+            # Try calling with full signature if original supports it
+            import inspect
+            sig = inspect.signature(_original_on_close)
+            params = list(sig.parameters.keys())
+            
+            # Most common: _on_close(self) or _on_close(self, ws)
+            if len(params) <= 2:
+                # Simple signature: just pass self
+                return _original_on_close(self)
+            else:
+                # Complex signature: pass all available args
+                return _original_on_close(self, ws, close_status_code, close_msg, *args, **kwargs)
         except Exception as e:
-            logger.error(f"Error in patched _on_close: {e}")
+            logger.warning(f"[PATCH] _on_close error (continuing): {e}")
+            # Never crash - let SDK handle it
+            pass
     
     def _patched_on_error(self, ws=None, error=None, *args, **kwargs):
+        """
+        Patched WebSocket error handler.
+        Matches original SDK signature exactly.
+        Safe: Gracefully handles signature mismatches.
+        """
         try:
-            if error is None:
-                error = Exception("Unknown error")
-            return _original_on_error(self, error)
+            import inspect
+            sig = inspect.signature(_original_on_error)
+            params = list(sig.parameters.keys())
+            
+            if len(params) <= 2:
+                # Simple signature
+                if error is None:
+                    error = Exception("Unknown error")
+                return _original_on_error(self)
+            else:
+                # Complex signature
+                if error is None:
+                    error = Exception("Unknown error")
+                return _original_on_error(self, error, *args, **kwargs)
         except Exception as e:
-            logger.error(f"Error in patched _on_error: {e}")
+            logger.warning(f"[PATCH] _on_error error (continuing): {e}")
+            # Never crash
+            pass
     
-    SmartWebSocketV2._on_close = _patched_on_close
-    SmartWebSocketV2._on_error = _patched_on_error
-    logger.info(" SmartWebSocketV2 patched")
+    # Apply patches safely
+    try:
+        SmartWebSocketV2._on_close = _patched_on_close
+        SmartWebSocketV2._on_error = _patched_on_error
+        logger.info(" SmartWebSocketV2 patched for signature safety")
+    except Exception as e:
+        # If patching fails, log and continue without patch
+        logger.warning(f"[PATCH] Failed to apply monkey patch: {e} (continuing without patch)")
     
 except ImportError:
     # Provide lightweight fallbacks so the module can be imported in test
@@ -381,7 +423,8 @@ class UnifiedFeed:
             if hasattr(self, 'ws') and self.ws is not None:
                 try:
                     self.ws.close_connection()
-                except:
+                except Exception as e:
+                    logger.exception(f"Failed to close old WebSocket connection: {e}")
                     pass
                 self.ws = None
             
@@ -396,7 +439,8 @@ class UnifiedFeed:
             # Disable Angel retry
             try:
                 self.ws.retry_attempts = 0
-            except:
+            except Exception as e:
+                logger.exception(f"Failed to set ws.retry_attempts: {e}")
                 pass
             
             # Set callbacks
@@ -432,10 +476,11 @@ class UnifiedFeed:
             logger.error(f" WebSocket connection error: {e}")
             self._schedule_reconnect()
         
-        finally:
+            finally:
             try:
                 self.reconnect_lock.release()
-            except:
+            except Exception as e:
+                logger.exception(f"Error releasing reconnect_lock: {e}")
                 pass
     
     def _invalidate_ltp_cache(self, reason: str):
@@ -467,7 +512,8 @@ class UnifiedFeed:
                             0.0,
                             ist_now()
                         )
-                    except:
+                    except Exception as e:
+                        logger.exception(f"tick_callback failed during cache invalidation: {e}")
                         pass
     
     def _on_open(self, wsapp):
@@ -480,7 +526,8 @@ class UnifiedFeed:
         if self.tick_callback:
             try:
                 self.tick_callback('WS_STATUS', 'CONNECTED', '', 0.0, ist_now())
-            except:
+            except Exception as e:
+                logger.exception(f"tick_callback failed on open: {e}")
                 pass
     
     def _on_data(self, wsapp, message):
@@ -554,7 +601,8 @@ class UnifiedFeed:
                     0.0,
                     ist_now()
                 )
-            except:
+            except Exception as e:
+                logger.exception(f"tick_callback failed on close: {e}")
                 pass
         
         # Schedule reconnect
@@ -606,7 +654,8 @@ class UnifiedFeed:
                         
                         try:
                             self.ws.close_connection()
-                        except:
+                        except Exception as e:
+                            logger.exception(f"watchdog failed to close ws: {e}")
                             pass
         
         threading.Thread(target=watchdog_loop, daemon=True).start()

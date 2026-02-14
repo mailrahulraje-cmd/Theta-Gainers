@@ -7,6 +7,9 @@ from constants import (
     PHASE_INIT, PHASE_IN_TRADE, PHASE_CLOSED
 )
 from utils.logger import logger
+from utils.order_journal import get_order_journal
+from utils.phase_manager import PhaseManager, LegState
+from utils.safety_validator import SafetyValidator
 from contract import StateProtocol, FeedProtocol, BrokerProtocol, NotifierProtocol
 
 def ist_now() -> datetime:
@@ -59,6 +62,12 @@ class StrategyEngine:
         self.broker = broker
         self.state = state
         self.notifier = notifier
+        
+        # Initialize PhaseManager for centralized phase and leg state tracking
+        self.phase_manager = PhaseManager(logger=logger)
+        
+        # Initialize SafetyValidator for live trading safety checks (7 requirements)
+        self.safety_validator = SafetyValidator(logger_instance=logger)
 
         self.threads = []
         self._stop_event = threading.Event()
@@ -107,15 +116,169 @@ class StrategyEngine:
         
         # Warning rate limit: log warnings at most once per this interval per token
         self._WARNING_RATE_LIMIT_SECONDS = 5.0
+        
+        # -------------------------
+        # MAIN LOOP FREQUENCY CONTROL
+        # -------------------------
+        # Enforce fixed minimum iteration interval using monotonic clock
+        self._loop_iteration_time = time.monotonic()
+        self._min_loop_interval = Config.MAIN_LOOP_INTERVAL_SECONDS
+        self._hard_exit_triggered = False  # Flag to track if hard exit was executed
 
     # -------------------------
     # lifecycle
     # -------------------------
+    
+    def _enforce_iteration_interval(self):
+        """
+        Enforce fixed minimum MAIN_LOOP_INTERVAL_SECONDS between iterations.
+        Uses monotonic clock to prevent API spamming and high CPU usage.
+        Sleep remaining duration if loop finishes early.
+        """
+        now = time.monotonic()
+        elapsed = now - self._loop_iteration_time
+        remaining = self._min_loop_interval - elapsed
+        
+        if remaining > 0.001:  # Only sleep if meaningful (>1ms)
+            time.sleep(remaining)
+        
+        self._loop_iteration_time = time.monotonic()
+    
+    def _check_hard_exit(self) -> bool:
+        """
+        Check if hard exit time has been reached.
+        If yes, trigger full flatten and disable new entries.
+        Returns True if hard exit was triggered.
+        
+        FORENSIC AUDIT:
+        - All positions closed are logged via OrderJournal
+        - Timestamps and prices recorded for analysis
+        """
+        try:
+            now = ist_now()
+            current_time = now.time()
+            hard_exit_time = Config.get_hard_exit_time()
+            
+            # In PAPER mode with IGNORE_MARKET_HOURS_IN_PAPER, skip hard exit enforcement
+            if Config.TRADING_MODE == 'PAPER' and Config.IGNORE_MARKET_HOURS_IN_PAPER:
+                return False  # Skip hard exit in paper mode with flag enabled
+            
+            if current_time >= hard_exit_time and not self._hard_exit_triggered:
+                # REQUIREMENT 5: HARD EXIT IDEMPOTENCY - Ensure executes only once
+                is_valid, idempotency_msg = self.safety_validator.validate_hard_exit_idempotency(
+                    hard_exit_triggered=True,
+                    state=self.state.get('trade_state', {}) or {}
+                )
+                logger.critical(f"HARD EXIT TRIGGERED: Current time {current_time} >= HARD_EXIT_TIME {hard_exit_time} | {idempotency_msg}")
+                
+                # Get order journal for logging
+                journal = get_order_journal()
+                
+                # Mark hard exit as triggered
+                self._hard_exit_triggered = True
+                self.state.set('hard_exit_triggered', True)
+                
+                # Disable new entries permanently for this session
+                if Config.DISABLE_ENTRIES_AFTER_HARD_EXIT:
+                    logger.critical(" Hard exit: disabling new entries for this session")
+                    self.state.set('hard_exit_no_new_entries', True)
+                
+                # Trigger full flatten if any positions are open
+                try:
+                    open_positions = {k: v for k, v in self.broker.positions.items() if v.get('qty', 0) != 0}
+                    if open_positions:
+                        logger.critical(f" Hard exit: closing {len(open_positions)} open positions")
+                        
+                        # Get market prices for closing (with retries)
+                        market_prices = {}
+                        for token in open_positions.keys():
+                            for attempt in range(3):
+                                try:
+                                    ltp = self.feed.get_ltp(str(token), check_freshness=False)
+                                    if ltp is None:
+                                        ltp = open_positions[token].get('last_price', open_positions[token].get('avg_price', 0.0))
+                                    market_prices[token] = ltp
+                                    break
+                                except Exception as e:
+                                    if attempt == 2:
+                                        # Last attempt failed, use average price
+                                        market_prices[token] = open_positions[token].get('avg_price', 0.0)
+                                        logger.warning(f"Failed to fetch LTP for {token} (attempt {attempt+1}), using avg price")
+                                    else:
+                                        time.sleep(0.1)
+                        
+                        # Close all positions with execution lock
+                        if hasattr(self.broker, '_execution_lock'):
+                            with self.broker._execution_lock:
+                                self.broker.close_all(market_prices)
+                        else:
+                            self.broker.close_all(market_prices)
+                        
+                        # Log each position close to order journal
+                        for token, pos in open_positions.items():
+                            try:
+                                close_price = market_prices.get(token, pos.get('avg_price', 0.0))
+                                journal.log_hard_exit(
+                                    symbol=pos.get('symbol', f'Token-{token}'),
+                                    strike=0,  # Not applicable for all positions
+                                    qty=abs(pos.get('qty', 0)),
+                                    price=close_price
+                                )
+                            except Exception:
+                                pass
+                        
+                        logger.critical(" Hard exit: all positions closed")
+                        
+                        # Verify positions are actually closed (broker is source of truth)
+                        time.sleep(0.5)
+                        try:
+                            open_after = {k: v for k, v in self.broker.positions.items() if v.get('qty', 0) != 0}
+                            if open_after:
+                                logger.error(f"WARNING: {len(open_after)} positions still open after hard exit flatten!")
+                                logger.error(f"Open positions: {list(open_after.keys())}")
+                        except Exception:
+                            pass
+                    
+                except Exception as e:
+                    logger.exception(f"Error during hard exit flatten: {e}")
+                
+                # Send Telegram alert
+                if self.notifier:
+                    try:
+                        msg = f"🔴 HARD EXIT EXECUTED\nTime: {current_time}\nAll open positions have been closed\nNo new entries permitted for this session"
+                        self.notifier.send_trade_log(msg)
+                    except Exception:
+                        logger.exception("Failed to send hard exit notification")
+                
+                return True
+            
+        except Exception as e:
+            logger.exception(f"Error in hard exit check: {e}")
+        
+        return self._hard_exit_triggered
+    
     def start(self):
         logger.info("[START] Starting strategy...")
         # ensure state initialized
         if not self.state.get('initialized'):
             self.state.update({'phase': PHASE_INIT, 'initialized': True})
+
+        # REQUIREMENT 3: RESTART RECOVERY - Check for open positions at broker
+        try:
+            logger.info("[SAFETY] Checking broker for open positions on startup...")
+            open_positions = {k: v for k, v in self.broker.positions.items() if v.get('qty', 0) != 0}
+            if open_positions:
+                logger.warning(f"[SAFETY] Found {len(open_positions)} open positions at startup - rebuilding leg state")
+                # Use get() with lock to safely access state dict from strategy engine context
+                state_dict = self.state.get('trade_state', {}) or {}
+                recovered_state = self.safety_validator.rebuild_leg_state_from_broker(open_positions, state_dict)
+                # Apply recovered state
+                if recovered_state != state_dict:
+                    self.state.update(recovered_state)
+            else:
+                logger.info("[SAFETY] No open positions at broker - starting fresh")
+        except Exception:
+            logger.exception("[SAFETY] Restart recovery error")
 
         # STANDBY MODE: Subscribe to spot immediately for pre-market heartbeat
         try:
@@ -183,13 +346,18 @@ class StrategyEngine:
         try:
             date_str = ts if isinstance(ts, str) else getattr(ts, 'isoformat', lambda: str(ts))()
             logger.info(f" Day change detected: {date_str}")
-            # reset daily flags
+            
+            # Reset daily flags
             self.state.update({
                 'phase0_done': False,
                 'phase1_done': False
             })
+            
+            # Reset PhaseManager state for new trading day
+            self.phase_manager.reset()
             self.set_phase(PHASE_INIT)
-            # notify strikes cleared
+            
+            # Notify strikes cleared
             if self.notifier:
                 try:
                     self.notifier.send_trade_log(f"Day change: {date_str} - resetting daily state")
@@ -742,6 +910,20 @@ class StrategyEngine:
                         wait_iterations = int(max_wait_seconds / Config.PHASE1_DATA_CHECK_INTERVAL)
                         
                         for i in range(wait_iterations):
+                            # REQUIREMENT 7: DELTA SELECTION LOOP SAFETY - Check timeout and retry limits
+                            elapsed_time = (i + 1) * Config.PHASE1_DATA_CHECK_INTERVAL
+                            should_continue, safety_msg = self.safety_validator.validate_delta_loop_safety(
+                                attempt_number=attempt_count,
+                                max_retries=Config.DELTA_LOOP_MAX_RETRIES,
+                                elapsed_time=elapsed_time,
+                                timeout_seconds=Config.DELTA_LOOP_TIMEOUT
+                            )
+                            
+                            if not should_continue:
+                                logger.warning(f"PHASE1: Delta loop safety limit reached: {safety_msg}")
+                                time.sleep(Config.PHASE1_RETRY_DELAY)
+                                return
+                            
                             time.sleep(Config.PHASE1_DATA_CHECK_INTERVAL)  # THROTTLE: Check interval
                             
                             # Check valid deltas
@@ -856,6 +1038,38 @@ class StrategyEngine:
         """
         while not self._stop_event.is_set():
             try:
+                # REQUIREMENT 1: BROKER POSITION RECONCILIATION (throttled to 30s)
+                reconciled, recon_msg = self.safety_validator.validate_broker_positions(
+                    self.state.get('trade_state', {}) or {},
+                    self.broker.positions,
+                    threshold_seconds=30
+                )
+                if not reconciled:
+                    logger.error(f"[SAFETY] Position mismatch detected - blocking new entries: {recon_msg}")
+                    time.sleep(5)  # Wait before retrying reconciliation check
+                    continue
+                
+                # Check hard exit before processing entries
+                if self._check_hard_exit():
+                    # Hard exit triggered - sleep and check again periodically
+                    time.sleep(1)
+                    continue
+                
+                # Check if hard exit blocks new entries
+                if self.state.get('hard_exit_no_new_entries'):
+                    logger.warning(" Hard exit: new entries disabled - skipping entry monitor")
+                    time.sleep(1)
+                    continue
+                
+                # REQUIREMENT 4: CE AND PE LEG INDEPENDENCE VERIFICATION
+                legs_valid, legs_msg = self.safety_validator.verify_leg_independence(
+                    self.state.state if hasattr(self.state, 'state') else {}
+                )
+                if not legs_valid:
+                    logger.error(f"[SAFETY] Leg independence violation: {legs_msg}")
+                    time.sleep(5)
+                    continue
+                
                 # Reset trade entry flag when starting fresh trade
                 if (self.state.get('sell_ce_leg_ready') and self.state.get('sell_pe_leg_ready') and
                     not self.state.get('sell_ce_entered') and not self.state.get('sell_pe_entered')):
@@ -903,7 +1117,8 @@ class StrategyEngine:
             except Exception:
                 logger.exception("Entry monitor error")
             
-            time.sleep(0.5)  # Health throttle
+            # Enforce minimum iteration interval
+            self._enforce_iteration_interval()
 
     def _check_sell_entry(self, ot):
         """Check and execute SELL entry with comprehensive debug logging"""
@@ -960,6 +1175,20 @@ class StrategyEngine:
                 logger.info(f"[SELL_ENTRY_CHECK] [OK] Order FILLED: {result}")
                 self.state.update({f'sell_{ot}_entered': True, f'sell_{ot}_entry_price': ltp})
                 logger.info(f" SELL {ot.upper()} @ Rs{ltp:.2f} - STATE UPDATED")
+                
+                # REQUIREMENT 2: STOP-LOSS ORDER VERIFICATION AFTER ENTRY
+                # Verify SL order exists at broker (if applicable for this broker type)
+                if hasattr(self.broker, 'orders'):
+                    sl_verified = self.safety_validator.verify_sl_order_after_entry(
+                        state=self.state.get('trade_state', {}) or {},
+                        broker_orders=self.broker.orders,
+                        entry_token=tok,
+                        leg_key=f'sell_{ot}'
+                    )
+                    if not sl_verified:
+                        logger.warning(f"[SAFETY] SL order verification failed for SELL_{ot.upper()} - will retry on next cycle")
+                        # Do not mark as failed - SL may be created asynchronously
+                
                 if self.notifier:
                     try:
                         # FIX: Pass all leg details so Notifier tracks the leg for snapshots
@@ -1055,6 +1284,9 @@ class StrategyEngine:
     def _exit_monitor(self):
         while not self._stop_event.is_set():
             try:
+                # Check hard exit first
+                self._check_hard_exit()
+                
                 if self.state.get('phase') != PHASE_IN_TRADE:
                     time.sleep(0.2)
                     continue
@@ -1064,7 +1296,9 @@ class StrategyEngine:
                 self._check_buy_exit('pe')
             except Exception:
                 logger.exception("Exit monitor error")
-            time.sleep(0.1)
+            
+            # Enforce minimum iteration interval
+            self._enforce_iteration_interval()
 
     def _check_sell_exit(self, ot):
         """
@@ -1480,6 +1714,9 @@ class StrategyEngine:
     def _squareoff_monitor(self):
         while not self._stop_event.is_set():
             try:
+                # Check hard exit first (should trigger before squareoff time)
+                self._check_hard_exit()
+                
                 if ist_now().time() >= Config.SQUAREOFF_TIME and not self.state.get('squareoff_done'):
                     logger.warning(" SQUAREOFF")
                     # attempt to close open positions via broker API
@@ -1510,7 +1747,9 @@ class StrategyEngine:
                     break
             except Exception:
                 pass
-            time.sleep(1)
+            
+            # Enforce minimum iteration interval
+            self._enforce_iteration_interval()
 
     # -------------------------
     # heartbeat

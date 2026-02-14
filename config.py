@@ -131,6 +131,9 @@ class Config:
     PRODUCT_TYPE = os.getenv("PRODUCT_TYPE", "INTRADAY")
     ORDER_MAX_RETRIES = int(os.getenv("ORDER_MAX_RETRIES", "3"))
     ORDER_RETRY_DELAY = float(os.getenv("ORDER_RETRY_DELAY", "1.0"))
+    # API call retry policy (for network hardening)
+    API_CALL_MAX_RETRIES = int(os.getenv("API_CALL_MAX_RETRIES", "3"))
+    API_CALL_RETRY_DELAY = float(os.getenv("API_CALL_RETRY_DELAY", "1.0"))
 
     # ===========================
     # RISK MANAGEMENT
@@ -214,6 +217,53 @@ class Config:
     # Trailing buffer as a percentage (e.g., 0.05 = 5%)
     # This is the buffer applied to the adverse price tracked during observation window
     TRAILING_BUFFER_PERCENT = float(os.getenv("TRAILING_BUFFER_PERCENT", "0.05"))
+
+    # ------------------------------------------------------------------
+    # Backwards-compatible fraction aliases
+    # ------------------------------------------------------------------
+    # Many parts of the codebase treat the above PERCENT values as fractions
+    # (e.g., using `entry * (1 + Config.SELL_SL_PERCENT)`). To avoid breaking
+    # existing logic while clarifying intent, provide explicit _FRACTION aliases
+    # and keep the original names for backward compatibility.
+    SELL_SL_FRACTION = SELL_SL_PERCENT
+    SELL_TP_FRACTION = SELL_TP_PERCENT
+    TRAILING_BUFFER_FRACTION = TRAILING_BUFFER_PERCENT
+    
+    # ===========================
+    # MAIN LOOP CONTROL & API RATE LIMITING
+    # ===========================
+    # Fixed minimum interval per main loop iteration (seconds)
+    # Prevents API spamming and high CPU usage
+    MAIN_LOOP_INTERVAL_SECONDS = float(os.getenv("MAIN_LOOP_INTERVAL_SECONDS", "0.5"))
+    
+    # API call rate limit (calls per second)
+    # Used for order placement, data fetch, and status checks
+    API_RATE_LIMIT_PER_SECOND = float(os.getenv("API_RATE_LIMIT_PER_SECOND", "2.0"))
+    
+    # ===========================
+    # HARD EXIT (MARKET CLOSE ENFORCEMENT)
+    # ===========================
+    # Time after which all positions MUST be closed (HH:MM format, IST)
+    # Default: 15:15 (before 15:30 market close)
+    HARD_EXIT_TIME = os.getenv("HARD_EXIT_TIME", "15:15")
+    
+    # Disable new entries after hard exit (prevents late entries)
+    DISABLE_ENTRIES_AFTER_HARD_EXIT = os.getenv("DISABLE_ENTRIES_AFTER_HARD_EXIT", "true").lower() == "true"
+    
+    # In PAPER mode, ignore market hours for HARD_EXIT (allows 24/7 testing)
+    # In LIVE mode, HARD_EXIT is always enforced at HARD_EXIT_TIME
+    IGNORE_MARKET_HOURS_IN_PAPER = os.getenv("IGNORE_MARKET_HOURS_IN_PAPER", "true").lower() == "true"
+    
+    # ===========================
+    # DELTA LOOP STABILIZATION
+    # ===========================
+    # Maximum time to wait for delta finding loop (seconds)
+    # If delta loop takes longer, it will timeout and continue
+    DELTA_LOOP_TIMEOUT = float(os.getenv("DELTA_LOOP_TIMEOUT", "5.0"))
+    
+    # Maximum retry attempts for delta finding loop
+    # If loop fails to converge, it will retry up to this many times
+    DELTA_LOOP_MAX_RETRIES = int(os.getenv("DELTA_LOOP_MAX_RETRIES", "3"))
     
     # ===========================
     # TELEGRAM NOTIFICATIONS
@@ -226,6 +276,18 @@ class Config:
     @classmethod
     def validate(cls):
         errors = []
+        
+        # Parse HARD_EXIT_TIME
+        try:
+            parts = cls.HARD_EXIT_TIME.split(":")
+            if len(parts) != 2:
+                raise ValueError("HARD_EXIT_TIME must be HH:MM format")
+            hour, minute = int(parts[0]), int(parts[1])
+            if not (0 <= hour <= 23 and 0 <= minute <= 59):
+                raise ValueError("Invalid hour/minute values")
+            cls._hard_exit_time = dt_time(hour, minute)
+        except Exception as e:
+            errors.append(f"Invalid HARD_EXIT_TIME '{cls.HARD_EXIT_TIME}': {e}")
 
         # Validate modes
         if cls.DATA_MODE not in ["LIVE", "REPLAY"]:
@@ -286,6 +348,15 @@ class Config:
     @classmethod
     def get_trades_csv(cls):
         return cls.LIVE_TRADES_CSV if cls.TRADING_MODE == "LIVE" else cls.PAPER_TRADES_CSV
+    
+    @classmethod
+    def get_hard_exit_time(cls) -> dt_time:
+        """Get parsed HARD_EXIT_TIME as datetime.time object"""
+        if not hasattr(cls, '_hard_exit_time'):
+            parts = cls.HARD_EXIT_TIME.split(":")
+            hour, minute = int(parts[0]), int(parts[1])
+            cls._hard_exit_time = dt_time(hour, minute)
+        return cls._hard_exit_time
 
 # Exchange type mapping
 EXCHANGE_TYPE_MAP = {"NSE": 1, "NFO": 2, "BSE": 3, "MCX": 5}

@@ -19,11 +19,23 @@ class StrategyState:
     def _load_state(self) -> Dict:
         if os.path.exists(self.state_file):
             try:
-                with open(self.state_file, 'r') as f:
+                with open(self.state_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
-            except Exception as e:
-                logger.error(f"Failed to load state file {self.state_file}: {e}")
+            except json.JSONDecodeError as e:
+                # Backup corrupted file for manual inspection and start with empty state
+                try:
+                    import shutil, time
+                    backup_path = f"{self.state_file}.corrupted.{int(time.time())}"
+                    shutil.copy(self.state_file, backup_path)
+                    logger.critical(
+                        f"⚠️ CORRUPTED STATE FILE - Backed up to {backup_path}\nError: {e}\nStarting with empty state - VERIFY NO OPEN POSITIONS AT BROKER"
+                    )
+                except Exception:
+                    logger.exception("Failed to backup corrupted state file")
                 return {}
+            except Exception as e:
+                logger.exception(f"Failed to load state file {self.state_file}: {e}")
+                raise
         return {}
     
     def _normalize_legacy_state(self):
@@ -326,15 +338,29 @@ class StrategyState:
         """
         Atomic state save to prevent corruption.
         Uses temporary file + atomic rename for safety.
+        Safe: Never raises exception to caller.
         """
         try:
             import os
-            tmp_file = self.state_file + ".tmp"
-            with open(tmp_file, 'w') as f:
+            from pathlib import Path
+            
+            # Ensure parent directory exists and handle Path objects safely
+            state_path = Path(self.state_file)
+            state_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Use Path / operator for safe concatenation (works with Path and str)
+            tmp_file = state_path.parent / f"{state_path.name}.tmp"
+            
+            # Write to temporary file
+            with open(str(tmp_file), 'w', encoding='utf-8') as f:
                 json.dump(self.state, f, indent=2)
-            os.replace(tmp_file, self.state_file)  # Atomic operation on POSIX systems
+            
+            # Atomic rename (safe on all platforms)
+            tmp_file.replace(state_path)
+            
         except Exception as e:
-            logger.error(f"State save failed: {e}")
+            # CRITICAL: Never crash - log but continue execution
+            logger.warning(f"State save warning: {e} (continuing execution)")
     
     def get(self, key: str, default: Any = None) -> Any:
         with self.lock:
