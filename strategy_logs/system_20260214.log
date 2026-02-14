@@ -1,0 +1,147 @@
+2026-02-14 13:49:07,866 [INFO] ✅ SmartWebSocketV2 patched
+2026-02-14 13:49:07,938 [INFO] ================================================================================
+2026-02-14 13:49:07,939 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-14 13:49:07,939 [INFO] ================================================================================
+2026-02-14 13:49:08,075 [INFO] ⏱️ Time drift: 2.412s
+2026-02-14 13:49:08,075 [INFO] ✅ Time sync OK
+2026-02-14 13:49:08,076 [INFO] ================================================================================
+2026-02-14 13:49:08,076 [INFO] 🔐 LOGGING IN TO ANGEL ONE
+2026-02-14 13:49:08,077 [INFO] ================================================================================
+2026-02-14 13:49:08,506 [INFO] Client Code: A300707
+2026-02-14 13:49:08,517 [INFO] TOTP: 361699
+2026-02-14 13:49:10,283 [INFO] ✅ Login successful
+2026-02-14 13:49:10,284 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-14 13:49:10,284 [INFO] ================================================================================
+2026-02-14 13:49:10,285 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-14 13:49:10,285 [INFO] ================================================================================
+2026-02-14 13:49:10,286 [INFO] 🔴 LIVE mode - initializing ENHANCED WebSocket
+2026-02-14 13:49:10,288 [INFO] 📹 Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-14 13:49:10,289 [INFO] 🔌 Connecting WebSocket...
+2026-02-14 13:49:10,479 [INFO] Websocket connected
+2026-02-14 13:49:10,480 [INFO] 🟢 WebSocket connection opened
+2026-02-14 13:49:10,482 [INFO] ✅ WebSocket connected - LTP cache INVALIDATED
+2026-02-14 13:49:10,484 [INFO] 🐕 Heartbeat watchdog started (timeout: 30.0s)
+2026-02-14 13:49:10,484 [INFO] ✅ LIVE data feed initialized
+2026-02-14 13:49:10,485 [INFO] ================================================================================
+2026-02-14 13:49:10,485 [INFO] CREATING BROKER: PAPER MODE
+2026-02-14 13:49:10,486 [INFO] ================================================================================
+2026-02-14 13:49:10,486 [INFO] TelegramNotifierTextOnly initialized (interval=60s)
+2026-02-14 13:49:11,930 [INFO] TelegramNotifierTextOnly started
+2026-02-14 13:49:11,932 [INFO] ================================================================================
+2026-02-14 13:49:11,933 [INFO] ✅ NOTIFIER PROTOCOL VALIDATED
+2026-02-14 13:49:11,934 [INFO] ================================================================================
+2026-02-14 13:49:11,935 [INFO] All 9 required methods present
+2026-02-14 13:49:11,936 [INFO] ================================================================================
+2026-02-14 13:49:11,937 [INFO] ✅ Telegram notifier started and validated
+2026-02-14 13:49:11,939 [ERROR] State save failed: unsupported operand type(s) for +: 'WindowsPath' and 'str'
+2026-02-14 13:49:11,940 [INFO] 📝 PAPER TRADING MODE - Simulated orders only
+2026-02-14 13:49:11,945 [INFO] ======================================================================
+2026-02-14 13:49:11,947 [INFO] ✅ EXECUTION GATEWAY INITIALIZED
+2026-02-14 13:49:11,949 [INFO] ======================================================================
+2026-02-14 13:49:11,950 [INFO] Rate Limit: 20 orders/minute
+2026-02-14 13:49:11,951 [INFO] Max Daily Loss: ₹10000.0
+2026-02-14 13:49:11,952 [INFO] Circuit Breaker: ENABLED
+2026-02-14 13:49:11,953 [INFO] Kill Switch: OFF
+2026-02-14 13:49:11,954 [INFO] No New Trades: NO
+2026-02-14 13:49:11,955 [INFO] ======================================================================
+2026-02-14 13:49:11,955 [INFO] ✅ PaperBroker: ExecutionGateway integrated
+2026-02-14 13:49:13,060 [INFO] 📚 Loaded 187043 instruments
+2026-02-14 13:49:13,060 [INFO] ✅ Notifier logging handler attached
+2026-02-14 13:49:13,570 [INFO] 📤 Sent system status: Login=SUCCESS, WS=PENDING
+2026-02-14 13:49:15,587 [INFO] ================================================================================
+2026-02-14 13:49:15,588 [INFO] ✅ NOTIFIER CONTRACT ASSERTION PASSED
+2026-02-14 13:49:15,589 [INFO] ================================================================================
+2026-02-14 13:49:15,589 [INFO] All 9 required methods verified
+2026-02-14 13:49:15,591 [INFO] ================================================================================
+2026-02-14 13:49:15,592 [INFO] 🚀 Starting strategy...
+2026-02-14 13:49:15,592 [ERROR] State save failed: unsupported operand type(s) for +: 'WindowsPath' and 'str'
+2026-02-14 13:49:15,593 [INFO] Market hours detected - skipping standby mode
+2026-02-14 13:49:15,594 [ERROR] State save failed: unsupported operand type(s) for +: 'WindowsPath' and 'str'
+2026-02-14 13:49:15,621 [INFO] 💓 13:49:15 | IN TRADE | P&L: ₹0.00 | Pos: 0
+2026-02-14 13:49:15,625 [INFO] ✅ Strategy engine started
+2026-02-14 13:49:15,626 [INFO] ================================================================================
+2026-02-14 13:49:15,627 [INFO] ✅ STRATEGY RUNNING
+2026-02-14 13:49:15,629 [INFO] ================================================================================
+2026-02-14 13:49:15,631 [INFO] Data Source: LIVE
+2026-02-14 13:49:15,632 [INFO] Trading Mode: PAPER
+2026-02-14 13:49:15,632 [INFO] Press Ctrl+C to stop
+2026-02-14 13:49:15,633 [INFO] ================================================================================
+2026-02-14 13:49:16,124 [INFO] 📤 Sent phase change: None → IN TRADE
+2026-02-14 13:49:20,626 [INFO] 💓 13:49:20 | IN TRADE | P&L: ₹0.00 | Pos: 0
+2026-02-14 13:49:25,628 [INFO] 💓 13:49:25 | IN TRADE | P&L: ₹0.00 | Pos: 0
+2026-02-14 13:49:30,630 [INFO] 💓 13:49:30 | IN TRADE | P&L: ₹0.00 | Pos: 0
+2026-02-14 14:04:49,013 [INFO] ✅ SmartWebSocketV2 patched
+2026-02-14 14:04:49,073 [INFO] ================================================================================
+2026-02-14 14:04:49,074 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-14 14:04:49,075 [INFO] ================================================================================
+2026-02-14 14:04:49,192 [INFO] ⏱️ Time drift: 2.417s
+2026-02-14 14:04:49,192 [INFO] ✅ Time sync OK
+2026-02-14 14:04:49,192 [INFO] ================================================================================
+2026-02-14 14:04:49,193 [INFO] 🔐 LOGGING IN TO ANGEL ONE
+2026-02-14 14:04:49,193 [INFO] ================================================================================
+2026-02-14 14:04:49,489 [INFO] Client Code: A300707
+2026-02-14 14:04:49,489 [INFO] TOTP: 318712
+2026-02-14 14:04:51,426 [INFO] ✅ Login successful
+2026-02-14 14:04:51,427 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-14 14:04:51,427 [INFO] ================================================================================
+2026-02-14 14:04:51,428 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-14 14:04:51,428 [INFO] ================================================================================
+2026-02-14 14:04:51,429 [INFO] 🔴 LIVE mode - initializing ENHANCED WebSocket
+2026-02-14 14:04:51,429 [INFO] 📹 Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-14 14:04:51,431 [INFO] 🔌 Connecting WebSocket...
+2026-02-14 14:04:51,671 [INFO] Websocket connected
+2026-02-14 14:04:51,673 [INFO] 🟢 WebSocket connection opened
+2026-02-14 14:04:51,677 [INFO] ✅ WebSocket connected - LTP cache INVALIDATED
+2026-02-14 14:04:51,679 [INFO] 🐕 Heartbeat watchdog started (timeout: 30.0s)
+2026-02-14 14:04:51,681 [INFO] ✅ LIVE data feed initialized
+2026-02-14 14:04:51,682 [INFO] ================================================================================
+2026-02-14 14:04:51,683 [INFO] CREATING BROKER: PAPER MODE
+2026-02-14 14:04:51,686 [INFO] ================================================================================
+2026-02-14 14:04:51,688 [INFO] TelegramNotifierTextOnly initialized (interval=60s)
+2026-02-14 14:04:51,689 [INFO] ✅ NOTIFIER PROTOCOL ASSERTION PASSED - all 9 methods verified
+2026-02-14 14:04:53,507 [INFO] TelegramNotifierTextOnly started
+2026-02-14 14:04:53,509 [INFO] ================================================================================
+2026-02-14 14:04:53,512 [INFO] ✅ NOTIFIER PROTOCOL VALIDATED
+2026-02-14 14:04:53,514 [INFO] ================================================================================
+2026-02-14 14:04:53,516 [INFO] All 9 required methods present
+2026-02-14 14:04:53,522 [INFO] ================================================================================
+2026-02-14 14:04:53,524 [INFO] ✅ Telegram notifier started and validated
+2026-02-14 14:04:53,528 [ERROR] State save failed: unsupported operand type(s) for +: 'WindowsPath' and 'str'
+2026-02-14 14:04:53,529 [INFO] 📝 PAPER TRADING MODE - Simulated orders only
+2026-02-14 14:04:53,531 [INFO] ======================================================================
+2026-02-14 14:04:53,532 [INFO] ✅ EXECUTION GATEWAY INITIALIZED
+2026-02-14 14:04:53,533 [INFO] ======================================================================
+2026-02-14 14:04:53,533 [INFO] Rate Limit: 20 orders/minute
+2026-02-14 14:04:53,534 [INFO] Max Daily Loss: ₹10000.0
+2026-02-14 14:04:53,535 [INFO] Circuit Breaker: ENABLED
+2026-02-14 14:04:53,536 [INFO] Kill Switch: OFF
+2026-02-14 14:04:53,536 [INFO] No New Trades: NO
+2026-02-14 14:04:53,538 [INFO] ======================================================================
+2026-02-14 14:04:53,538 [INFO] ✅ PaperBroker: ExecutionGateway integrated
+2026-02-14 14:04:54,647 [INFO] 📚 Loaded 187043 instruments
+2026-02-14 14:04:54,648 [INFO] ✅ Notifier logging handler attached
+2026-02-14 14:04:55,126 [INFO] 📤 Sent system status: Login=SUCCESS, WS=PENDING
+2026-02-14 14:04:57,129 [INFO] ================================================================================
+2026-02-14 14:04:57,130 [INFO] ✅ NOTIFIER CONTRACT ASSERTION PASSED
+2026-02-14 14:04:57,131 [INFO] ================================================================================
+2026-02-14 14:04:57,133 [INFO] All 9 required methods verified
+2026-02-14 14:04:57,134 [INFO] ================================================================================
+2026-02-14 14:04:57,136 [INFO] 🚀 Starting strategy...
+2026-02-14 14:04:57,138 [ERROR] State save failed: unsupported operand type(s) for +: 'WindowsPath' and 'str'
+2026-02-14 14:04:57,139 [INFO] Market hours detected - skipping standby mode
+2026-02-14 14:04:57,143 [INFO] 📍 PHASE TRANSITION: INIT → IN TRADE
+2026-02-14 14:04:57,145 [ERROR] State save failed: unsupported operand type(s) for +: 'WindowsPath' and 'str'
+2026-02-14 14:04:57,152 [INFO] 💓 14:04:57 | IN TRADE | P&L: ₹0.00 | Pos: 0
+2026-02-14 14:04:57,155 [INFO] ✅ Strategy engine started
+2026-02-14 14:04:57,158 [INFO] ================================================================================
+2026-02-14 14:04:57,159 [INFO] ✅ STRATEGY RUNNING
+2026-02-14 14:04:57,160 [INFO] ================================================================================
+2026-02-14 14:04:57,161 [INFO] Data Source: LIVE
+2026-02-14 14:04:57,161 [INFO] Trading Mode: PAPER
+2026-02-14 14:04:57,165 [INFO] Press Ctrl+C to stop
+2026-02-14 14:04:57,166 [INFO] ================================================================================
+2026-02-14 14:04:57,609 [INFO] 📤 Sent phase change: None → IN TRADE
+2026-02-14 14:05:02,159 [INFO] 💓 14:05:02 | IN TRADE | P&L: ₹0.00 | Pos: 0
+2026-02-14 14:05:07,162 [INFO] 💓 14:05:07 | IN TRADE | P&L: ₹0.00 | Pos: 0
+2026-02-14 14:05:12,165 [INFO] 💓 14:05:12 | IN TRADE | P&L: ₹0.00 | Pos: 0
+2026-02-14 15:22:37,313 [WARNING] SmartAPI not installed; using fallback placeholders for SmartConnect and SmartWebSocketV2

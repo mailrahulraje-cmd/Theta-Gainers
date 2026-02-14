@@ -1,0 +1,12 @@
+{
+  "last_run_date": "2026-02-14",
+  "lot_size": 15,
+  "broker_positions": {
+    "12345": {
+      "qty": 300,
+      "avg_price": 100.5,
+      "side": "LONG",
+      "last_price": 100.5
+    }
+  }
+}
