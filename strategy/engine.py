@@ -807,7 +807,7 @@ class StrategyEngine:
         """
         try:
             # FIX: Ensure phase1_done is set if we return early
-            if self.trade_leg_manager.get_leg('buy_ce').token and self.state.get('buy_pe_leg_ready'):
+            if self.trade_leg_manager.get_leg('buy_ce').token and self.trade_leg_manager.get_leg('buy_pe'):
                 if not self.state.get('phase1_done'):
                     self.state.set('phase1_done', True)
                     self.state.set('phase1_complete_time', time.time())
@@ -816,14 +816,14 @@ class StrategyEngine:
                     # Send lock event notification (all 4 legs ready)
                     if self.notifier:
                         try:
-                            sell_ce_strike = self.state.get('sell_ce_strike', 0)
-                            sell_ce_ref = self.state.get('sell_ce_ref_premium', 0.0)
-                            sell_pe_strike = self.state.get('sell_pe_strike', 0)
-                            sell_pe_ref = self.state.get('sell_pe_ref_premium', 0.0)
-                            buy_ce_strike = self.state.get('buy_ce_strike', 0)
-                            buy_ce_ref = self.state.get('buy_ce_ref_premium', 0.0)
-                            buy_pe_strike = self.state.get('buy_pe_strike', 0)
-                            buy_pe_ref = self.state.get('buy_pe_ref_premium', 0.0)
+                            sell_ce_strike = self.trade_leg_manager.get_leg('sell_ce')
+                            sell_ce_ref = self.trade_leg_manager.get_leg('sell_ce')
+                            sell_pe_strike = self.trade_leg_manager.get_leg('sell_pe')
+                            sell_pe_ref = self.trade_leg_manager.get_leg('sell_pe')
+                            buy_ce_strike = self.trade_leg_manager.get_leg('buy_ce')
+                            buy_ce_ref = self.trade_leg_manager.get_leg('buy_ce')
+                            buy_pe_strike = self.trade_leg_manager.get_leg('buy_pe')
+                            buy_pe_ref = self.trade_leg_manager.get_leg('buy_pe')
                             
                             self.notifier.send_lock_event(
                                 sell_ce_strike, sell_ce_ref,
@@ -889,11 +889,11 @@ class StrategyEngine:
             
             # FIX: Only fetch and subscribe to options if that specific leg is NOT locked
             ce_options = []
-            if not self.state.get('buy_ce_leg_ready'):
+            if not self.trade_leg_manager.get_leg('buy_ce'):
                 ce_options = self.instruments.find_options_in_range(atm, atm + range_val, 'CE', expiry)
                 
             pe_options = []
-            if not self.state.get('buy_pe_leg_ready'):
+            if not self.trade_leg_manager.get_leg('buy_pe'):
                 pe_options = self.instruments.find_options_in_range(atm - range_val, atm, 'PE', expiry)
             
             # Subscribe to options for delta calculation
@@ -970,7 +970,7 @@ class StrategyEngine:
             pe_exhausted = pe_attempts >= max_per_leg
             
             # Select BUY CE leg independently (with per-leg attempt tracking)
-            if not self.state.get('buy_ce_leg_ready'):
+            if not self.trade_leg_manager.get_leg('buy_ce'):
                 if not ce_exhausted:
                     buy_ce = self._select_by_delta(atm, atm + range_val, 'CE', expiry, Config.TARGET_CE_DELTA)
                     if buy_ce:
@@ -985,7 +985,7 @@ class StrategyEngine:
                     self.state.set('_phase1_buy_ce_final_status', 'FAILED_MAX_ATTEMPTS')
             
             # Select BUY PE leg independently (with per-leg attempt tracking)
-            if not self.state.get('buy_pe_leg_ready'):
+            if not self.trade_leg_manager.get_leg('buy_pe'):
                 if not pe_exhausted:
                     buy_pe = self._select_by_delta(atm - range_val, atm, 'PE', expiry, Config.TARGET_PE_DELTA)
                     if buy_pe:
@@ -1003,7 +1003,7 @@ class StrategyEngine:
             # 1. Both legs ready (success), OR
             # 2. Both legs exhausted (give up), OR
             # 3. Global attempt limit exceeded (safety)
-            both_legs_ready = (self.state.get('buy_ce_leg_ready') and self.state.get('buy_pe_leg_ready'))
+            both_legs_ready = (self.trade_leg_manager.get_leg('buy_ce') and self.trade_leg_manager.get_leg('buy_pe'))
             both_legs_exhausted = (ce_exhausted and pe_exhausted)
             
             if both_legs_ready:
@@ -1015,14 +1015,14 @@ class StrategyEngine:
                 # Send lock event notification (all 4 legs ready)
                 if self.notifier:
                     try:
-                        sell_ce_strike = self.state.get('sell_ce_strike', 0)
-                        sell_ce_ref = self.state.get('sell_ce_ref_premium', 0.0)
-                        sell_pe_strike = self.state.get('sell_pe_strike', 0)
-                        sell_pe_ref = self.state.get('sell_pe_ref_premium', 0.0)
-                        buy_ce_strike = self.state.get('buy_ce_strike', 0)
-                        buy_ce_ref = self.state.get('buy_ce_ref_premium', 0.0)
-                        buy_pe_strike = self.state.get('buy_pe_strike', 0)
-                        buy_pe_ref = self.state.get('buy_pe_ref_premium', 0.0)
+                        sell_ce_strike = self.trade_leg_manager.get_leg('sell_ce')
+                        sell_ce_ref = self.trade_leg_manager.get_leg('sell_ce')
+                        sell_pe_strike = self.trade_leg_manager.get_leg('sell_pe')
+                        sell_pe_ref = self.trade_leg_manager.get_leg('sell_pe')
+                        buy_ce_strike = self.trade_leg_manager.get_leg('buy_ce')
+                        buy_ce_ref = self.trade_leg_manager.get_leg('buy_ce')
+                        buy_pe_strike = self.trade_leg_manager.get_leg('buy_pe')
+                        buy_pe_ref = self.trade_leg_manager.get_leg('buy_pe')
                         
                         self.notifier.send_lock_event(
                             sell_ce_strike, sell_ce_ref,
@@ -1043,8 +1043,8 @@ class StrategyEngine:
                 pe_status = self.state.get('_phase1_buy_pe_final_status', 'UNKNOWN')
                 
                 logger.warning("[WARN] PHASE1: Both legs exhausted max attempts - completing phase1")
-                logger.warning(f"  BUY CE leg status: {ce_status} (ready={self.state.get('buy_ce_leg_ready', False)})")
-                logger.warning(f"  BUY PE leg status: {pe_status} (ready={self.state.get('buy_pe_leg_ready', False)})")
+                logger.warning(f"  BUY CE leg status: {ce_status} (ready={self.trade_leg_manager.get_leg('buy_ce')})")
+                logger.warning(f"  BUY PE leg status: {pe_status} (ready={self.trade_leg_manager.get_leg('buy_pe')})")
                 logger.warning("[WARN] PHASE1: Entry monitor will work with available hedges")
             
             elif attempt_count >= max_attempts:
@@ -1054,8 +1054,8 @@ class StrategyEngine:
                 self.state.set('_phase1_completed_without_hedges', True)
                 
                 logger.warning(f"[WARN] PHASE1: Global attempt limit ({max_attempts}) exceeded - forcing phase1_done")
-                logger.warning(f"  BUY CE: ready={self.state.get('buy_ce_leg_ready', False)}, attempts={ce_attempts}")
-                logger.warning(f"  BUY PE: ready={self.state.get('buy_pe_leg_ready', False)}, attempts={pe_attempts}")
+                logger.warning(f"  BUY CE: ready={self.trade_leg_manager.get_leg('buy_ce')}, attempts={ce_attempts}")
+                logger.warning(f"  BUY PE: ready={self.trade_leg_manager.get_leg('buy_pe')}, attempts={pe_attempts}")
 
         except Exception:
             logger.exception("PHASE1 Delta Selection failed")
@@ -1151,8 +1151,8 @@ class StrategyEngine:
                     continue
                 
                 # Reset trade entry flag when starting fresh trade
-                if (self.state.get('sell_ce_leg_ready') and self.state.get('sell_pe_leg_ready') and
-                    not self.state.get('sell_ce_entered') and not self.state.get('sell_pe_entered')):
+                if (self.trade_leg_manager.get_leg('sell_ce') and self.trade_leg_manager.get_leg('sell_pe') and
+                    not self.trade_leg_manager.get_leg('sell_ce') and not self.trade_leg_manager.get_leg('sell_pe')):
                     if self.notifier:
                         try:
                             self.notifier.state_cache.reset_trade_entry_flag()
@@ -1160,23 +1160,23 @@ class StrategyEngine:
                             pass
                 
                 # SELL CE - Independent execution
-                if self.state.get('sell_ce_leg_ready') and not self.state.get('sell_ce_entered'):
+                if self.trade_leg_manager.get_leg('sell_ce') and not self.trade_leg_manager.get_leg('sell_ce'):
                     self._check_sell_entry('ce')
                 
                 # SELL PE - Independent execution
-                if self.state.get('sell_pe_leg_ready') and not self.state.get('sell_pe_entered'):
+                if self.trade_leg_manager.get_leg('sell_pe') and not self.trade_leg_manager.get_leg('sell_pe'):
                     self._check_sell_entry('pe')
                 
                 # Check if both SELL legs entered and send trade entry notification
-                if (self.state.get('sell_ce_entered') and self.state.get('sell_pe_entered') and
+                if (self.trade_leg_manager.get_leg('sell_ce') and self.trade_leg_manager.get_leg('sell_pe') and
                     self.notifier):
                     try:
-                        sell_ce_strike = self.state.get('sell_ce_strike', 0)
-                        sell_ce_price = self.state.get('sell_ce_entry_price', 0.0)
+                        sell_ce_strike = self.trade_leg_manager.get_leg('sell_ce')
+                        sell_ce_price = self.trade_leg_manager.get_leg('sell_ce')
                         sell_ce_sl = sell_ce_price * (1 + Config.SELL_SL_PERCENT)
                         
-                        sell_pe_strike = self.state.get('sell_pe_strike', 0)
-                        sell_pe_price = self.state.get('sell_pe_entry_price', 0.0)
+                        sell_pe_strike = self.trade_leg_manager.get_leg('sell_pe')
+                        sell_pe_price = self.trade_leg_manager.get_leg('sell_pe')
                         sell_pe_sl = sell_pe_price * (1 + Config.SELL_SL_PERCENT)
                         
                         self.notifier.send_trade_entry(
@@ -1187,11 +1187,11 @@ class StrategyEngine:
                         pass
                 
                 # BUY CE - Independent execution (only if leg is ready)
-                if self.state.get('buy_ce_leg_ready') and not self.state.get('buy_ce_entered'):
+                if self.trade_leg_manager.get_leg('buy_ce') and not self.trade_leg_manager.get_leg('buy_ce'):
                     self._check_buy_entry('ce')
                 
                 # BUY PE - Independent execution (only if leg is ready)
-                if self.state.get('buy_pe_leg_ready') and not self.state.get('buy_pe_entered'):
+                if self.trade_leg_manager.get_leg('buy_pe') and not self.trade_leg_manager.get_leg('buy_pe'):
                     self._check_buy_entry('pe')
                 
             except Exception:
@@ -1493,11 +1493,11 @@ class StrategyEngine:
                                         try:
                                             # Get both CE and PE SLs to send together
                                             if ot == 'ce':
-                                                ce_strike = self.state.get('sell_ce_strike', 0)
+                                                ce_strike = self.trade_leg_manager.get_leg('sell_ce')
                                                 ce_sl = sl
                                                 # Check if PE trailing is also active
-                                                pe_strike = self.state.get('sell_pe_strike', 0)
-                                                pe_entry = self.state.get('sell_pe_entry_price', 0)
+                                                pe_strike = self.trade_leg_manager.get_leg('sell_pe')
+                                                pe_entry = self.trade_leg_manager.get_leg('sell_pe')
                                                 pe_sl = pe_entry * (1 + Config.SELL_SL_PERCENT) if pe_entry else 0
                                                 
                                                 # Try to get PE trailing SL if active
@@ -1510,11 +1510,11 @@ class StrategyEngine:
                                                 
                                                 self.notifier.send_trailing_sl_update(ce_strike, ce_sl, pe_strike, pe_sl)
                                             else:  # pe
-                                                pe_strike = self.state.get('sell_pe_strike', 0)
+                                                pe_strike = self.trade_leg_manager.get_leg('sell_pe')
                                                 pe_sl = sl
                                                 # Check if CE trailing is also active
-                                                ce_strike = self.state.get('sell_ce_strike', 0)
-                                                ce_entry = self.state.get('sell_ce_entry_price', 0)
+                                                ce_strike = self.trade_leg_manager.get_leg('sell_ce')
+                                                ce_entry = self.trade_leg_manager.get_leg('sell_ce')
                                                 ce_sl = ce_entry * (1 + Config.SELL_SL_PERCENT) if ce_entry else 0
                                                 
                                                 # Try to get CE trailing SL if active
@@ -1709,8 +1709,8 @@ class StrategyEngine:
                                 self._trailing_sell_ce_adverse_price = ltp_ce
             
             # ===== TRACK SELL PE (Completely Independent) =====
-            if self.state.get('sell_pe_entered') and not self.state.get('sell_pe_exited'):
-                tok_pe = self.state.get('sell_pe_token')
+            if self.trade_leg_manager.get_leg('sell_pe') and not self.trade_leg_manager.get_leg('sell_pe'):
+                tok_pe = self.trade_leg_manager.get_leg('sell_pe').token
                 if tok_pe:
                     ltp_pe = self.feed.get_ltp(tok_pe)
                     if ltp_pe is not None:
@@ -1740,8 +1740,8 @@ class StrategyEngine:
         """
         try:
             # ===== CHECK SELL CE =====
-            if self.state.get('sell_ce_entered') and not self.state.get('sell_ce_exited'):
-                tok = self.state.get('sell_ce_token')
+            if self.trade_leg_manager.get_leg('sell_ce') and not self.trade_leg_manager.get_leg('sell_ce'):
+                tok = self.trade_leg_manager.get_leg('sell_ce').token
                 if tok:
                     ltp = self.feed.get_ltp(tok)
                     if ltp is not None:
@@ -1763,8 +1763,8 @@ class StrategyEngine:
                             )
             
             # ===== CHECK SELL PE (Independent) =====
-            if self.state.get('sell_pe_entered') and not self.state.get('sell_pe_exited'):
-                tok = self.state.get('sell_pe_token')
+            if self.trade_leg_manager.get_leg('sell_pe') and not self.trade_leg_manager.get_leg('sell_pe'):
+                tok = self.trade_leg_manager.get_leg('sell_pe').token
                 if tok:
                     ltp = self.feed.get_ltp(tok)
                     if ltp is not None:
