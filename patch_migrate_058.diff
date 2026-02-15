@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1160,7 +1160,7 @@
+                             pass
+                 
+                 # SELL CE - Independent execution
+-                if self.state.get('sell_ce_leg_ready') and not self.state.get('sell_ce_entered'):
++                if self.trade_leg_manager.get_leg('sell_ce').token and not self.state.get('sell_ce_entered'):
+                     self._check_sell_entry('ce')
+                 
+                 # SELL PE - Independent execution

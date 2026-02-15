@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1164,7 +1164,7 @@
+                     self._check_sell_entry('ce')
+                 
+                 # SELL PE - Independent execution
+-                if self.state.get('sell_pe_leg_ready') and not self.state.get('sell_pe_entered'):
++                if self.trade_leg_manager.get_leg('sell_pe').token and not self.state.get('sell_pe_entered'):
+                     self._check_sell_entry('pe')
+                 
+                 # Check if both SELL legs entered and send trade entry notification

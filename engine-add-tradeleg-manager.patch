@@ -1,0 +1,15 @@
+*** Begin Patch
+*** Update File: strategy/engine.py
+@@
+ from utils.safety_validator import SafetyValidator
+ from contract import StateProtocol, FeedProtocol, BrokerProtocol, NotifierProtocol
++from core.trade_leg_manager import TradeLegManager
++from contract import TradeLegV1
++from core.state_schema import validate_state_schema
+@@
+         # Initialize SafetyValidator for live trading safety checks (7 requirements)
+         self.safety_validator = SafetyValidator(logger_instance=logger)
++        
++        # TradeLegManager for type-safe leg storage used by engine logic
++        self.trade_leg_manager = TradeLegManager()
+*** End Patch

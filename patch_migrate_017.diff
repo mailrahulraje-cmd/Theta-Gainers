@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -817,7 +817,7 @@
+                     if self.notifier:
+                         try:
+                             sell_ce_strike = self.state.get('sell_ce_strike', 0)
+-                            sell_ce_ref = self.state.get('sell_ce_ref_premium', 0.0)
++                            sell_ce_ref = self.state.get('sell_ce_ref_premium', 0.0)
+                             sell_pe_strike = self.state.get('sell_pe_strike', 0)
+                             sell_pe_ref = self.state.get('sell_pe_ref_premium', 0.0)
+                             buy_ce_strike = self.state.get('buy_ce_strike', 0)

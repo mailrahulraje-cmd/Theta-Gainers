@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -893,7 +893,7 @@
+                 ce_options = self.instruments.find_options_in_range(atm, atm + range_val, 'CE', expiry)
+                 
+             pe_options = []
+-            if not self.state.get('buy_pe_leg_ready'):
++            if not self.trade_leg_manager.get_leg('buy_pe').token:
+                 pe_options = self.instruments.find_options_in_range(atm - range_val, atm, 'PE', expiry)
+             
+             # Subscribe to options for delta calculation

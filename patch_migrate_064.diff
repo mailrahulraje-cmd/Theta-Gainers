@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1171,7 +1171,7 @@
+                 if (self.state.get('sell_ce_entered') and self.state.get('sell_pe_entered') and
+                     self.notifier):
+                     try:
+-                        sell_ce_strike = self.state.get('sell_ce_strike', 0)
++                        sell_ce_strike = self.state.get('sell_ce_strike', 0)
+                         sell_ce_price = self.state.get('sell_ce_entry_price', 0.0)
+                         sell_ce_sl = sell_ce_price * (1 + Config.SELL_SL_PERCENT)
+                         

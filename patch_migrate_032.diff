@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -970,7 +970,7 @@
+             pe_exhausted = pe_attempts >= max_per_leg
+             
+             # Select BUY CE leg independently (with per-leg attempt tracking)
+-            if not self.state.get('buy_ce_leg_ready'):
++            if not self.trade_leg_manager.get_leg('buy_ce').token:
+                 if not ce_exhausted:
+                     buy_ce = self._select_by_delta(atm, atm + range_val, 'CE', expiry, Config.TARGET_CE_DELTA)
+                     if buy_ce:

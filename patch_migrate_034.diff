@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1003,7 +1003,7 @@
+             # 1. Both legs ready (success), OR
+             # 2. Both legs exhausted (give up), OR
+             # 3. Global attempt limit exceeded (safety)
+-            both_legs_ready = (self.state.get('buy_ce_leg_ready') and self.state.get('buy_pe_leg_ready'))
++            both_legs_ready = (self.trade_leg_manager.get_leg('buy_ce').token and self.state.get('buy_pe_leg_ready'))
+             both_legs_exhausted = (ce_exhausted and pe_exhausted)
+             
+             if both_legs_ready:

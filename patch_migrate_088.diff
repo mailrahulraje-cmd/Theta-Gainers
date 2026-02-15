@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1741,7 +1741,7 @@
+         try:
+             # ===== CHECK SELL CE =====
+             if self.state.get('sell_ce_entered') and not self.state.get('sell_ce_exited'):
+-                tok = self.state.get('sell_ce_token')
++                tok = self.trade_leg_manager.get_leg('sell_ce').token
+                 if tok:
+                     ltp = self.feed.get_ltp(tok)
+                     if ltp is not None:

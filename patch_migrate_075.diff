@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1493,7 +1493,7 @@
+                                         try:
+                                             # Get both CE and PE SLs to send together
+                                             if ot == 'ce':
+-                                                ce_strike = self.state.get('sell_ce_strike', 0)
++                                                ce_strike = self.state.get('sell_ce_strike', 0)
+                                                 ce_sl = sl
+                                                 # Check if PE trailing is also active
+                                                 pe_strike = self.state.get('sell_pe_strike', 0)

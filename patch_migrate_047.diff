@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1044,7 +1044,7 @@
+                 
+                 logger.warning("[WARN] PHASE1: Both legs exhausted max attempts - completing phase1")
+                 logger.warning(f"  BUY CE leg status: {ce_status} (ready={self.state.get('buy_ce_leg_ready', False)})")
+-                logger.warning(f"  BUY PE leg status: {pe_status} (ready={self.state.get('buy_pe_leg_ready', False)})")
++                logger.warning(f"  BUY PE leg status: {pe_status} (ready={self.state.get('buy_pe_leg_ready', False)})")
+                 logger.warning("[WARN] PHASE1: Entry monitor will work with available hedges")
+             
+             elif attempt_count >= max_attempts:

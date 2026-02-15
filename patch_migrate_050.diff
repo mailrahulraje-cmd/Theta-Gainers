@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1055,7 +1055,7 @@
+                 
+                 logger.warning(f"[WARN] PHASE1: Global attempt limit ({max_attempts}) exceeded - forcing phase1_done")
+                 logger.warning(f"  BUY CE: ready={self.state.get('buy_ce_leg_ready', False)}, attempts={ce_attempts}")
+-                logger.warning(f"  BUY PE: ready={self.state.get('buy_pe_leg_ready', False)}, attempts={pe_attempts}")
++                logger.warning(f"  BUY PE: ready={self.state.get('buy_pe_leg_ready', False)}, attempts={pe_attempts}")
+ 
+         except Exception:
+             logger.exception("PHASE1 Delta Selection failed")

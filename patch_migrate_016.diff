@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -816,7 +816,7 @@
+                     # Send lock event notification (all 4 legs ready)
+                     if self.notifier:
+                         try:
+-                            sell_ce_strike = self.state.get('sell_ce_strike', 0)
++                            sell_ce_strike = self.state.get('sell_ce_strike', 0)
+                             sell_ce_ref = self.state.get('sell_ce_ref_premium', 0.0)
+                             sell_pe_strike = self.state.get('sell_pe_strike', 0)
+                             sell_pe_ref = self.state.get('sell_pe_ref_premium', 0.0)

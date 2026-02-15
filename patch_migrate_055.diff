@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1151,7 +1151,7 @@
+                     continue
+                 
+                 # Reset trade entry flag when starting fresh trade
+-                if (self.state.get('sell_ce_leg_ready') and self.state.get('sell_pe_leg_ready') and
++                if (self.state.get('sell_ce_leg_ready') and self.trade_leg_manager.get_leg('sell_pe').token and
+                     not self.state.get('sell_ce_entered') and not self.state.get('sell_pe_entered')):
+                     if self.notifier:
+                         try:

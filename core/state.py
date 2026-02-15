@@ -506,3 +506,19 @@ class StrategyState:
             for key in ['sell_ce_entered', 'sell_pe_entered', 'buy_ce_entered', 'buy_pe_entered']:
                 if key in updates:
                     logger.info(f"[STATE]  State updated: {key}={updates[key]}")
+    
+    def is_leg_entered(self, leg_name: str) -> bool:
+        """Return True if the named leg exists and is marked entered.
+        Prefer TradeLegManager typed accessor, fallback to legacy state dict."""
+        # prefer typed accessor if present
+        try:
+            if hasattr(self, "trade_leg_manager") and self.trade_leg_manager:
+                tleg = self.trade_leg_manager.get_leg(leg_name)
+                return bool(tleg and getattr(tleg, "entered", False))
+        except Exception:
+            pass
+        # fallback to legacy state dict accessor
+        try:
+            return bool(self.get(f"{leg_name}_entered"))
+        except Exception:
+            return False

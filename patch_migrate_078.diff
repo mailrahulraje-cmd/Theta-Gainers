@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1510,7 +1510,7 @@
+                                                 
+                                                 self.notifier.send_trailing_sl_update(ce_strike, ce_sl, pe_strike, pe_sl)
+                                             else:  # pe
+-                                                pe_strike = self.state.get('sell_pe_strike', 0)
++                                                pe_strike = self.state.get('sell_pe_strike', 0)
+                                                 pe_sl = sl
+                                                 # Check if CE trailing is also active
+                                                 ce_strike = self.state.get('sell_ce_strike', 0)

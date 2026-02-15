@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1513,7 +1513,7 @@
+                                                 pe_strike = self.state.get('sell_pe_strike', 0)
+                                                 pe_sl = sl
+                                                 # Check if CE trailing is also active
+-                                                ce_strike = self.state.get('sell_ce_strike', 0)
++                                                ce_strike = self.state.get('sell_ce_strike', 0)
+                                                 ce_entry = self.state.get('sell_ce_entry_price', 0)
+                                                 ce_sl = ce_entry * (1 + Config.SELL_SL_PERCENT) if ce_entry else 0
+                                                 

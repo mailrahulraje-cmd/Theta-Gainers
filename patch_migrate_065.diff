@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1175,7 +1175,7 @@
+                         sell_ce_price = self.state.get('sell_ce_entry_price', 0.0)
+                         sell_ce_sl = sell_ce_price * (1 + Config.SELL_SL_PERCENT)
+                         
+-                        sell_pe_strike = self.state.get('sell_pe_strike', 0)
++                        sell_pe_strike = self.state.get('sell_pe_strike', 0)
+                         sell_pe_price = self.state.get('sell_pe_entry_price', 0.0)
+                         sell_pe_sl = sell_pe_price * (1 + Config.SELL_SL_PERCENT)
+                         

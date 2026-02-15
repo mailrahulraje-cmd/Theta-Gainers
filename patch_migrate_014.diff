@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -807,7 +807,7 @@
+         """
+         try:
+             # FIX: Ensure phase1_done is set if we return early
+-            if self.trade_leg_manager.get_leg('buy_ce').token and self.state.get('buy_pe_leg_ready'):
++            if self.trade_leg_manager.get_leg('buy_ce').token and self.trade_leg_manager.get_leg('buy_pe').token:
+                 if not self.state.get('phase1_done'):
+                     self.state.set('phase1_done', True)
+                     self.state.set('phase1_complete_time', time.time())

@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1764,7 +1764,7 @@
+             
+             # ===== CHECK SELL PE (Independent) =====
+             if self.state.get('sell_pe_entered') and not self.state.get('sell_pe_exited'):
+-                tok = self.state.get('sell_pe_token')
++                tok = self.trade_leg_manager.get_leg('sell_pe').token
+                 if tok:
+                     ltp = self.feed.get_ltp(tok)
+                     if ltp is not None:

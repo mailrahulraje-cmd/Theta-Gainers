@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1019,7 +1019,7 @@
+                         sell_ce_ref = self.state.get('sell_ce_ref_premium', 0.0)
+                         sell_pe_strike = self.state.get('sell_pe_strike', 0)
+                         sell_pe_ref = self.state.get('sell_pe_ref_premium', 0.0)
+-                        buy_ce_strike = self.state.get('buy_ce_strike', 0)
++                        buy_ce_strike = self.state.get('buy_ce_strike', 0)
+                         buy_ce_ref = self.state.get('buy_ce_ref_premium', 0.0)
+                         buy_pe_strike = self.state.get('buy_pe_strike', 0)
+                         buy_pe_ref = self.state.get('buy_pe_ref_premium', 0.0)

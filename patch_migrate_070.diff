@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -1191,7 +1191,7 @@
+                     self._check_buy_entry('ce')
+                 
+                 # BUY PE - Independent execution (only if leg is ready)
+-                if self.state.get('buy_pe_leg_ready') and not self.state.get('buy_pe_entered'):
++                if self.trade_leg_manager.get_leg('buy_pe').token and not self.state.get('buy_pe_entered'):
+                     self._check_buy_entry('pe')
+                 
+             except Exception:

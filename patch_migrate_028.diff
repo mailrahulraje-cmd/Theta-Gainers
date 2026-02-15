@@ -1,0 +1,11 @@
+--- a/strategy/engine.py
++++ b/strategy/engine.py
+@@ -889,7 +889,7 @@
+             
+             # FIX: Only fetch and subscribe to options if that specific leg is NOT locked
+             ce_options = []
+-            if not self.state.get('buy_ce_leg_ready'):
++            if not self.trade_leg_manager.get_leg('buy_ce').token:
+                 ce_options = self.instruments.find_options_in_range(atm, atm + range_val, 'CE', expiry)
+                 
+             pe_options = []
