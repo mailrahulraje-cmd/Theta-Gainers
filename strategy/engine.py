@@ -1692,11 +1692,14 @@ class StrategyEngine:
         """
         try:
             # ===== TRACK SELL CE (Independent) =====
-            if self.state.get('sell_ce_entered') and not self.state.get('sell_ce_exited'):
-                tok_ce = self.state.get('sell_ce_token')
-                if tok_ce:
-                    ltp_ce = self.feed.get_ltp(tok_ce)
-                    if ltp_ce is not None:
+            leg = self.trade_leg_manager.get_leg('sell_ce')
+            if leg is None:
+                logger.error("Missing trade leg: sell_ce")
+                raise RuntimeError("Missing trade leg: sell_ce")
+            tok_ce = leg.token
+            if tok_ce:
+                ltp_ce = self.feed.get_ltp(tok_ce)
+                if ltp_ce is not None:
                         with self._trailing_lock:
                             # PURE OBSERVATION: Only update tracking variable
                             # For sold options, adverse = highest price
