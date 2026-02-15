@@ -11,6 +11,10 @@ from utils.order_journal import get_order_journal
 from utils.phase_manager import PhaseManager, LegState
 from utils.safety_validator import SafetyValidator
 from contract import StateProtocol, FeedProtocol, BrokerProtocol, NotifierProtocol
+from core.trade_leg_manager import TradeLegManager
+from contract import TradeLegV1
+from core.state_schema import validate_state_schema
+
 
 def ist_now() -> datetime:
     return datetime.now(Config.TZ)
@@ -68,6 +72,9 @@ class StrategyEngine:
         
         # Initialize SafetyValidator for live trading safety checks (7 requirements)
         self.safety_validator = SafetyValidator(logger_instance=logger)
+        # TradeLegManager for type-safe leg storage used by engine logic
+        self.trade_leg_manager = TradeLegManager()
+
 
         self.threads = []
         self._stop_event = threading.Event()
@@ -953,28 +960,54 @@ class StrategyEngine:
                         time.sleep(Config.PHASE1_RETRY_DELAY)  # THROTTLE before next attempt
                         return
             
-            # Select BUY CE leg independently
+            # PHASE 1 FIX: Per-leg attempt tracking for independent leg processing
+            # Each leg now tracks its own attempt counter
+            ce_attempts = self.state.get('_phase1_buy_ce_attempts', 0)
+            pe_attempts = self.state.get('_phase1_buy_pe_attempts', 0)
+            max_per_leg = Config.PHASE1_MAX_ATTEMPTS_PER_LEG if hasattr(Config, 'PHASE1_MAX_ATTEMPTS_PER_LEG') else 30
+            
+            ce_exhausted = ce_attempts >= max_per_leg
+            pe_exhausted = pe_attempts >= max_per_leg
+            
+            # Select BUY CE leg independently (with per-leg attempt tracking)
             if not self.state.get('buy_ce_leg_ready'):
-                buy_ce = self._select_by_delta(atm, atm + range_val, 'CE', expiry, Config.TARGET_CE_DELTA)
-                if buy_ce:
-                    self.state.lock_buy_ce_leg(buy_ce)
-                    logger.info(f"[OK] PHASE1: BUY CE locked at strike {buy_ce.get('strike')}")
+                if not ce_exhausted:
+                    buy_ce = self._select_by_delta(atm, atm + range_val, 'CE', expiry, Config.TARGET_CE_DELTA)
+                    if buy_ce:
+                        self.state.lock_buy_ce_leg(buy_ce)
+                        logger.info(f"[OK] PHASE1: BUY CE locked at strike {buy_ce.get('strike')}")
+                    else:
+                        logger.warning(f"PHASE1: BUY CE not found (attempt {ce_attempts + 1}/{max_per_leg})")
+                        self.state.set('_phase1_buy_ce_attempts', ce_attempts + 1)
+                        time.sleep(Config.PHASE1_RETRY_DELAY)  # THROTTLE before next attempt
                 else:
-                    logger.warning(f"PHASE1: BUY CE not found (attempt {attempt_count + 1}/{max_attempts})")
-                    time.sleep(Config.PHASE1_RETRY_DELAY)  # THROTTLE before next attempt
+                    logger.warning(f"PHASE1: BUY CE max attempts ({max_per_leg}) exhausted - stopping CE retries")
+                    self.state.set('_phase1_buy_ce_final_status', 'FAILED_MAX_ATTEMPTS')
             
-            # Select BUY PE leg independently
+            # Select BUY PE leg independently (with per-leg attempt tracking)
             if not self.state.get('buy_pe_leg_ready'):
-                buy_pe = self._select_by_delta(atm - range_val, atm, 'PE', expiry, Config.TARGET_PE_DELTA)
-                if buy_pe:
-                    self.state.lock_buy_pe_leg(buy_pe)
-                    logger.info(f"[OK] PHASE1: BUY PE locked at strike {buy_pe.get('strike')}")
+                if not pe_exhausted:
+                    buy_pe = self._select_by_delta(atm - range_val, atm, 'PE', expiry, Config.TARGET_PE_DELTA)
+                    if buy_pe:
+                        self.state.lock_buy_pe_leg(buy_pe)
+                        logger.info(f"[OK] PHASE1: BUY PE locked at strike {buy_pe.get('strike')}")
+                    else:
+                        logger.warning(f"PHASE1: BUY PE not found (attempt {pe_attempts + 1}/{max_per_leg})")
+                        self.state.set('_phase1_buy_pe_attempts', pe_attempts + 1)
+                        time.sleep(Config.PHASE1_RETRY_DELAY)  # THROTTLE before next attempt
                 else:
-                    logger.warning(f"PHASE1: BUY PE not found (attempt {attempt_count + 1}/{max_attempts})")
-                    time.sleep(Config.PHASE1_RETRY_DELAY)  # THROTTLE before next attempt
+                    logger.warning(f"PHASE1: BUY PE max attempts ({max_per_leg}) exhausted - stopping PE retries")
+                    self.state.set('_phase1_buy_pe_final_status', 'FAILED_MAX_ATTEMPTS')
             
-            # Mark phase1 done only if BOTH BUY legs ready
-            if self.state.get('buy_ce_leg_ready') and self.state.get('buy_pe_leg_ready'):
+            # IMPROVED GATE: Mark phase1_done when:
+            # 1. Both legs ready (success), OR
+            # 2. Both legs exhausted (give up), OR
+            # 3. Global attempt limit exceeded (safety)
+            both_legs_ready = (self.state.get('buy_ce_leg_ready') and self.state.get('buy_pe_leg_ready'))
+            both_legs_exhausted = (ce_exhausted and pe_exhausted)
+            
+            if both_legs_ready:
+                # Both legs locked successfully
                 self.state.set('phase1_done', True)
                 self.state.set('phase1_complete_time', time.time())
                 logger.info("[OK] PHASE1: Both BUY legs locked and ready")
@@ -999,6 +1032,30 @@ class StrategyEngine:
                         )
                     except Exception:
                         pass
+            
+            elif both_legs_exhausted:
+                # Both legs exhausted max attempts - complete with partial/no hedges
+                self.state.set('phase1_done', True)
+                self.state.set('phase1_complete_time', time.time())
+                self.state.set('_phase1_completed_without_hedges', True)
+                
+                ce_status = self.state.get('_phase1_buy_ce_final_status', 'UNKNOWN')
+                pe_status = self.state.get('_phase1_buy_pe_final_status', 'UNKNOWN')
+                
+                logger.warning("[WARN] PHASE1: Both legs exhausted max attempts - completing phase1")
+                logger.warning(f"  BUY CE leg status: {ce_status} (ready={self.state.get('buy_ce_leg_ready', False)})")
+                logger.warning(f"  BUY PE leg status: {pe_status} (ready={self.state.get('buy_pe_leg_ready', False)})")
+                logger.warning("[WARN] PHASE1: Entry monitor will work with available hedges")
+            
+            elif attempt_count >= max_attempts:
+                # Global attempt limit exceeded (safety net for old logic)
+                self.state.set('phase1_done', True)
+                self.state.set('phase1_complete_time', time.time())
+                self.state.set('_phase1_completed_without_hedges', True)
+                
+                logger.warning(f"[WARN] PHASE1: Global attempt limit ({max_attempts}) exceeded - forcing phase1_done")
+                logger.warning(f"  BUY CE: ready={self.state.get('buy_ce_leg_ready', False)}, attempts={ce_attempts}")
+                logger.warning(f"  BUY PE: ready={self.state.get('buy_pe_leg_ready', False)}, attempts={pe_attempts}")
 
         except Exception:
             logger.exception("PHASE1 Delta Selection failed")
@@ -1039,6 +1096,23 @@ class StrategyEngine:
         while not self._stop_event.is_set():
             try:
                 # REQUIREMENT 1: BROKER POSITION RECONCILIATION (throttled to 30s)
+                # Force a fresh reconciliation from broker API before making decisions
+                try:
+                    if hasattr(self.broker, '_sync_positions_from_broker'):
+                        self.broker._sync_positions_from_broker()
+                    else:
+                        # Fallback to fetch API if sync method missing
+                        if hasattr(self.broker, 'fetch_positions_from_broker'):
+                            self.broker.fetch_positions_from_broker()
+                except Exception:
+                    logger.exception("Failed to force reconciliation before strategy decision - blocking entries")
+                    try:
+                        self.state.set('trading_blocked_reconcile_stale', True)
+                    except Exception:
+                        logger.exception("Failed to persist trading_blocked_reconcile_stale flag")
+                    time.sleep(5)
+                    continue
+
                 reconciled, recon_msg = self.safety_validator.validate_broker_positions(
                     self.state.get('trade_state', {}) or {},
                     self.broker.positions,
@@ -1059,6 +1133,12 @@ class StrategyEngine:
                 if self.state.get('hard_exit_no_new_entries'):
                     logger.warning(" Hard exit: new entries disabled - skipping entry monitor")
                     time.sleep(1)
+                    continue
+
+                # Persistent hard-exit block (manual reset required)
+                if self.state.get('hard_exit_blocked'):
+                    logger.critical(" Hard-exit BLOCK: trading blocked until manual reset - skipping entry monitor")
+                    time.sleep(5)
                     continue
                 
                 # REQUIREMENT 4: CE AND PE LEG INDEPENDENCE VERIFICATION
@@ -1862,6 +1942,15 @@ class StrategyEngine:
         meta = {"label": label} if label else {}
 
         for attempt in range(1, max_retries + 1):
+            # Block order placement if hard-exit block flag is set (requires manual reset)
+            try:
+                if self.state.get('hard_exit_blocked'):
+                    logger.critical(f"[ORDER_SAFE] Order blocked by hard_exit_blocked flag: {side} {token} x{qty}")
+                    return None
+            except Exception:
+                # If state access fails, log and proceed with attempts
+                logger.exception("Failed to read hard_exit_blocked flag from state")
+
             try:
                 # Try common signatures in order
                 tried = False
