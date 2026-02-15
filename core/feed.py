@@ -476,7 +476,7 @@ class UnifiedFeed:
             logger.error(f" WebSocket connection error: {e}")
             self._schedule_reconnect()
         
-            finally:
+        finally:
             try:
                 self.reconnect_lock.release()
             except Exception as e:
