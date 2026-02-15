@@ -517,6 +517,14 @@ class StrategyState:
                 return bool(tleg and getattr(tleg, "entered", False))
         except Exception:
             pass
+        # fallback to structured legs dict if present
+        try:
+            if "legs" in self.state and isinstance(self.state["legs"], dict):
+                leg_data = self.state["legs"].get(leg_name, {})
+                if isinstance(leg_data, dict) and "entered" in leg_data:
+                    return bool(leg_data["entered"])
+        except Exception:
+            pass
         # fallback to legacy state dict accessor
         try:
             return bool(self.get(f"{leg_name}_entered"))
@@ -532,7 +540,36 @@ class StrategyState:
                     return getattr(tleg, "token", None)
         except Exception:
             pass
+        # fallback to structured legs dict if present
+        try:
+            if "legs" in self.state and isinstance(self.state["legs"], dict):
+                leg_data = self.state["legs"].get(leg_name, {})
+                if isinstance(leg_data, dict) and "token" in leg_data:
+                    return leg_data["token"]
+        except Exception:
+            pass
+        # fallback to legacy flat state format
         try:
             return self.get(f"{leg_name}_token")
         except Exception:
             return None
+    
+    def get_leg_state(self, leg_name: str) -> str | None:
+        """Return the state (IDLE, ENTERED, EXITED) for the named leg from trade_state."""
+        try:
+            trade_state = self.state.get("trade_state", {})
+            if isinstance(trade_state, dict) and leg_name in trade_state:
+                return trade_state[leg_name]
+        except Exception:
+            pass
+        return None
+    
+    def has_any_entered_leg(self) -> bool:
+        """Return True if any leg is currently in ENTERED state."""
+        try:
+            trade_state = self.state.get("trade_state", {})
+            if isinstance(trade_state, dict):
+                return any(state == "ENTERED" for state in trade_state.values())
+        except Exception:
+            pass
+        return False
