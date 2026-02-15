@@ -210,3 +210,48 @@ class NotifierProtocol(Protocol):
     def heartbeat(self, phase: str, pnl: float, pos_count: int, 
                  legs: Any = None) -> None:
         ...
+
+
+# -------------------------------------------------------------------
+# Trade Leg Data Model
+# -------------------------------------------------------------------
+
+from dataclasses import dataclass, field
+from typing import Optional
+
+@dataclass
+class TradeLegV1:
+    """
+    Type-safe representation of a single trade leg (position in one option contract).
+    Used by TradeLegManager for type-safe leg storage and access.
+    """
+    token: Any  # Instrument token (broker-specific format)
+    quantity: int = 0  # Position quantity
+    side: str = 'UNKNOWN'  # BUY or SELL
+    entry_price: float = 0.0  # Entry price when position opened
+    timestamp: float = 0.0  # Entry timestamp (seconds since epoch)
+    version: str = '1.0'  # Data format version
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dictionary."""
+        return {
+            'token': self.token,
+            'quantity': self.quantity,
+            'side': self.side,
+            'entry_price': self.entry_price,
+            'timestamp': self.timestamp,
+            'version': self.version,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'TradeLegV1':
+        """Deserialize from dictionary."""
+        return cls(
+            token=data.get('token'),
+            quantity=data.get('quantity', 0),
+            side=data.get('side', 'UNKNOWN'),
+            entry_price=data.get('entry_price', 0.0),
+            timestamp=data.get('timestamp', 0.0),
+            version=data.get('version', '1.0'),
+        )
+
