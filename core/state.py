@@ -522,3 +522,17 @@ class StrategyState:
             return bool(self.get(f"{leg_name}_entered"))
         except Exception:
             return False
+    
+    def get_leg_token(self, leg_name: str) -> str | None:
+        """Return the token for the named leg. Prefer TradeLegManager, fallback to legacy state."""
+        try:
+            if hasattr(self, "trade_leg_manager") and self.trade_leg_manager:
+                tleg = self.trade_leg_manager.get_leg(leg_name)
+                if tleg is not None:
+                    return getattr(tleg, "token", None)
+        except Exception:
+            pass
+        try:
+            return self.get(f"{leg_name}_token")
+        except Exception:
+            return None

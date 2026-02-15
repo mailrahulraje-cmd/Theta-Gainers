@@ -1997,3 +1997,5 @@ config.ConfigurationError: =====================================================
 2026-02-15 15:44:27,132 [INFO] State migration v1.0 -> v2.0 complete
 2026-02-15 15:44:27,156 [INFO] State validation: State validation complete
 2026-02-15 15:52:43,581 [WARNING] Invalid leg_name: invalid_leg
+2026-02-15 15:56:02,302 [WARNING] Invalid leg_name: invalid_leg
+2026-02-15 15:56:29,647 [WARNING] Invalid leg_name: invalid_leg
