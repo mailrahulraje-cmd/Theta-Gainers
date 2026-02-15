@@ -11,6 +11,12 @@ import threading
 import pyotp
 from datetime import datetime
 
+# ✅ ENFORCE UTF-8 ENCODING FOR EMOJI SUPPORT
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+except Exception:
+    pass  # Fallback for environments where reconfigure is not available
+
 # Add src to path if needed
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,6 +27,7 @@ from utils.time_sync import TimeSync
 from utils.notifier import TelegramNotifierTextOnly
 from core.feed import UnifiedFeed
 from core.state import StrategyState
+from core.execution_gateway import get_execution_gateway
 from paper_broker import PaperBroker
 from live_broker import LiveBroker
 from strategy.instruments import InstrumentMaster
@@ -280,6 +287,19 @@ def main():
         # Set instruments in broker for validation
         if hasattr(broker, 'instruments'):
             broker.instruments = instruments
+        
+        # ====================================================================
+        # CRITICAL: Connect feed to ExecutionGateway for feed circuit breaker
+        # ====================================================================
+        try:
+            gateway = get_execution_gateway()
+            gateway.set_feed(feed)
+            if notifier:
+                gateway.set_notifier(notifier)
+            logger.info(" ExecutionGateway: Feed circuit breaker ENABLED")
+        except Exception as e:
+            logger.exception(f"Failed to set feed on ExecutionGateway: {e}")
+            logger.warning(" Feed circuit breaker will be DISABLED")
         
         # Attach notifier logging handler
         if notifier:

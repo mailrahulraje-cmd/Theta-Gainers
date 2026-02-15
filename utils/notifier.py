@@ -612,6 +612,7 @@ class TelegramNotifierTextOnly:
     def send_system_status(self, login_status: str, websocket_status: str):
         """
         Send system status alert ONLY when status changes.
+        Uses emoji-rich formatting for mobile readability.
         
         Args:
             login_status: "SUCCESS", "FAILED", etc.
@@ -622,15 +623,31 @@ class TelegramNotifierTextOnly:
         
         time_str = datetime.now().strftime("%H:%M:%S")
         
+        # Map login status to emoji
+        login_emoji = "✅" if "SUCCESS" in login_status.upper() else "❌"
+        login_text = f"{login_emoji} <b>{login_status}</b>"
+        
+        # Map websocket status to emoji
+        if "CONNECTED" in websocket_status.upper():
+            ws_emoji = "✅"
+        elif "DISCONNECTED" in websocket_status.upper():
+            ws_emoji = "⚠️"
+        elif "RECONNECT" in websocket_status.upper():
+            ws_emoji = "⏳"
+        else:
+            ws_emoji = "🔄"
+        ws_text = f"{ws_emoji} <b>{websocket_status}</b>"
+        
         text = (
-            " <b>SYSTEM STATUS UPDATE</b>\n\n"
-            f"Login: <b>{login_status}</b>\n"
-            f"Websocket: <b>{websocket_status}</b>\n"
-            f"Time: <code>{time_str}</code>"
+            "🔄 <b>SYSTEM STATUS UPDATE</b>\n"
+            "────────────────────────────\n\n"
+            f"Login: {login_text}\n"
+            f"WebSocket: {ws_text}\n\n"
+            f"<code>Time: {time_str} IST</code>"
         )
         
         self._send_message(text)
-        logger.info(f" Sent system status: Login={login_status}, WS={websocket_status}")
+        logger.info(f"🔄 System status: Login={login_status}, WS={websocket_status}")
     
     def send_phase_change(self, new_phase: str):
         """
@@ -660,17 +677,105 @@ class TelegramNotifierTextOnly:
         
         time_str = datetime.now().strftime("%H:%M:%S")
         
+        # Use phase-specific emoji
+        phase_emoji = "🚀" if "IN_TRADE" in new_phase else "⏳" if "PHASE_0" in new_phase else "🔄"
+        prev_emoji = "🚀" if prev_phase and "IN_TRADE" in prev_phase else "⏳" if prev_phase and "PHASE_0" in prev_phase else "➡️"
+        
         text = (
-            " <b>STRATEGY PHASE CHANGE</b>\n\n"
-            f"Previous: <b>{prev_phase or 'NONE'}</b>\n"
-            f"Current: <b>{new_phase}</b>\n"
-            f"Time: <code>{time_str}</code>"
+            f"{phase_emoji} <b>STRATEGY PHASE CHANGE</b>\n"
+            "────────────────────────────\n\n"
+            f"{prev_emoji} Previous: <b>{prev_phase or 'NONE'}</b>\n"
+            f"{phase_emoji} Current: <b>{new_phase}</b>\n\n"
+            f"<code>Time: {time_str} IST</code>"
         )
         
         # Network I/O outside any locks - caller not blocked
         self._send_message(text)
-        logger.info(f" Sent phase change: {prev_phase}  {new_phase}")
+        logger.info(f"{phase_emoji} Phase change: {prev_phase} → {new_phase}")
     
+    # =============================================================================
+    # SAFETY & SYSTEM ALERT MESSAGES (Non-blocking)
+    # =============================================================================
+    
+    def send_trading_blocked(self, reason: str, recovery_action: str = None):
+        """
+        Send trading blocked alert with emoji and clear formatting.
+        
+        Args:
+            reason: Reason for blocking (e.g., "Max loss reached", "Connection lost")
+            recovery_action: Recovery action (e.g., "Manual intervention required")
+        """
+        time_str = datetime.now().strftime("%H:%M:%S")
+        
+        text = (
+            "🚫 <b>TRADING BLOCKED</b>\n"
+            "────────────────────────────────\n\n"
+            f"⚠️  <b>Reason:</b> {reason}\n"
+        )
+        
+        if recovery_action:
+            text += f"🔧 <b>Action:</b> {recovery_action}\n"
+        
+        text += f"\n<code>Time: {time_str} IST</code>"
+        
+        self._send_message(text)
+        logger.warning(f"🚫 Trading blocked: {reason}")
+    
+    def send_entry_monitor_paused(self, reason: str = "Entry monitor paused", resume_info: str = None):
+        """
+        Send entry monitor paused alert.
+        
+        Args:
+            reason: Reason for pause
+            resume_info: When/how it will resume
+        """
+        time_str = datetime.now().strftime("%H:%M:%S")
+        
+        text = (
+            "⏳ <b>ENTRY MONITOR PAUSED</b>\n"
+            "────────────────────────────────\n\n"
+            f"Reason: <b>{reason}</b>\n"
+        )
+        
+        if resume_info:
+            text += f"ℹ️  {resume_info}\n"
+        
+        text += f"\n<code>Time: {time_str} IST</code>"
+        
+        self._send_message(text)
+        logger.info(f"⏳ Entry monitor paused: {reason}")
+    
+    def send_ticks_missing(self, missing_count: int, duration_sec: int, last_ltp_time: str = None):
+        """
+        Send ticks missing/reconnecting alert.
+        
+        Args:
+            missing_count: Number of ticks missed
+            duration_sec: Duration of missing data in seconds
+            last_ltp_time: When last LTP was received (e.g., "09:45:30")
+        """
+        time_str = datetime.now().strftime("%H:%M:%S")
+        
+        text = (
+            "⚠️  <b>TICKS MISSING</b>\n"
+            "────────────────────────────────\n\n"
+            f"📊 Ticks Missed: <b>{missing_count}</b>\n"
+            f"⏱️  Duration: <b>{duration_sec}s</b>\n"
+        )
+        
+        if last_ltp_time:
+            text += f"🕐 Last LTP: <code>{last_ltp_time}</code>\n"
+        
+        text += (
+            f"\n🔄 Status: <b>Auto-reconnecting...</b>\n"
+            f"<code>Time: {time_str} IST</code>"
+        )
+        
+        self._send_message(text)
+        logger.warning(f"⚠️  Ticks missing: {missing_count} ticks for {duration_sec}s")
+
+    # ═════════════════════════════════════════════════════════════════════════════
+
     def send_lock_event(self, sell_ce_strike: int, sell_ce_price: float,
                        sell_pe_strike: int, sell_pe_price: float,
                        buy_ce_strike: int, buy_ce_price: float,
@@ -702,6 +807,7 @@ class TelegramNotifierTextOnly:
                         sell_pe_strike: int, sell_pe_price: float, sell_pe_sl: float):
         """
         Send trade entry alert ONCE when sell legs are executed.
+        Enhanced with emoji formatting and mobile-friendly layout.
         
         Args:
             sell_ce_strike, sell_ce_price, sell_ce_sl: CE leg details
@@ -713,24 +819,27 @@ class TelegramNotifierTextOnly:
         time_str = datetime.now().strftime("%H:%M:%S")
         
         text = (
-            "🟢 <b>TRADE ENTRY EXECUTED</b>\n\n"
-            "📞 <b>CALL (CE)</b> | 🟥 Sell\n"
+            "🟢 <b>TRADE ENTRY EXECUTED</b>\n"
+            "────────────────────────────────────\n\n"
+            "📞 <b>CALL (CE)</b> | 🟥 Sell Short\n"
             f"Strike: <b>{sell_ce_strike}</b> | Entry: <b>₹{sell_ce_price:.2f}</b>\n"
             f"🔒 Stop Loss: <b>₹{sell_ce_sl:.2f}</b>\n\n"
-            "📧 <b>PUT (PE)</b> | 🟥 Sell\n"
+            "📧 <b>PUT (PE)</b> | 🟥 Sell Short\n"
             f"Strike: <b>{sell_pe_strike}</b> | Entry: <b>₹{sell_pe_price:.2f}</b>\n"
             f"🔒 Stop Loss: <b>₹{sell_pe_sl:.2f}</b>\n\n"
-            f"⏰ Time: <code>{time_str}</code>"
+            "────────────────────────────────────\n"
+            f"<code>Entry Time: {time_str} IST</code>"
         )
         
         self._send_message(text)
-        logger.info(f"🟢 Sent trade entry: CE {sell_ce_strike}, PE {sell_pe_strike}")
+        logger.info(f"🟢 Trade entry: CE {sell_ce_strike}, PE {sell_pe_strike}")
     
     
     def send_trailing_sl_update(self, ce_strike: int, ce_sl: float,
                                 pe_strike: int, pe_sl: float):
         """
         Send trailing SL update ONLY when SL values change.
+        Enhanced with emoji formatting and mobile-friendly layout.
         
         Args:
             ce_strike, ce_sl: CE leg strike and new SL
@@ -742,14 +851,15 @@ class TelegramNotifierTextOnly:
         time_str = datetime.now().strftime("%H:%M:%S")
         
         text = (
-            "🔒 <b>STOP LOSS UPDATED</b>\n\n"
+            "🔒 <b>STOP LOSS UPDATED</b>\n"
+            "────────────────────────────────\n\n"
             f"📞 CE {ce_strike}: <b>₹{ce_sl:.2f}</b>\n"
             f"📧 PE {pe_strike}: <b>₹{pe_sl:.2f}</b>\n\n"
-            f"⏰ Time: <code>{time_str}</code>"
+            f"<code>Time: {time_str} IST</code>"
         )
         
         self._send_message(text)
-        logger.info(f"🔒 Sent trailing SL update: CE={ce_sl:.2f}, PE={pe_sl:.2f}")
+        logger.info(f"🔒 SL update: CE={ce_sl:.2f}, PE={pe_sl:.2f}")
 
     # =============================================================================
     # ERROR ALERTS (Categorized: Connection / Trade / Data)
@@ -758,6 +868,7 @@ class TelegramNotifierTextOnly:
     def send_connection_lost(self, service: str, last_ltp_time: str = None, retry_info: str = None):
         """
         Send connection lost alert (ONE-TIME per occurrence).
+        Enhanced with emojis and mobile-friendly formatting.
         
         Args:
             service: "WebSocket" or "API"
@@ -767,26 +878,31 @@ class TelegramNotifierTextOnly:
         if not self.state_cache.should_send_connection_event("LOST"):
             return  # Already sent, suppressed
         
+        time_str = datetime.now().strftime("%H:%M:%S")
+        
         text = (
-            "⚠️ <b>CONNECTION LOST</b>\n\n"
+            "⚠️  <b>CONNECTION LOST</b>\n"
+            "────────────────────────────────\n\n"
             f"Service: <b>{service}</b>\n"
         )
         
         if last_ltp_time:
-            text += f"Last LTP: <code>{last_ltp_time}</code>\n"
+            text += f"📍 Last LTP: <code>{last_ltp_time}</code>\n"
         
         text += (
-            f"Status: <b>🔄 RECONNECTING</b>\n"
-            f"Action: Check network\n\n"
-            f"ℹ️ {retry_info or 'Auto-reconnecting...'}"
+            f"\n🔄 Status: <b>RECONNECTING</b>\n"
+            f"🔧 Action: Check network\n\n"
+            f"ℹ️  {retry_info or 'Auto-reconnecting...'}\n\n"
+            f"<code>Time: {time_str} IST</code>"
         )
         
         self._send_message(text)
-        logger.error(f"⚠️  Sent connection lost alert: {service}")
+        logger.error(f"⚠️  Connection lost: {service}")
     
     def send_connection_restored(self, service: str):
         """
         Send connection restored alert (ONE-TIME on recovery).
+        Enhanced with emojis and mobile-friendly formatting.
         
         Args:
             service: "WebSocket" or "API"
@@ -797,18 +913,20 @@ class TelegramNotifierTextOnly:
         time_str = datetime.now().strftime("%H:%M:%S")
         
         text = (
-            "✅ <b>CONNECTION RESTORED</b>\n\n"
+            "✅ <b>CONNECTION RESTORED</b>\n"
+            "────────────────────────────────\n\n"
             f"Service: <b>{service}</b>\n"
-            f"Status: <b>🟢 ONLINE</b>\n"
-            f"<code>Time: {time_str}</code>"
+            f"Status: <b>🟢 ONLINE</b>\n\n"
+            f"<code>Time: {time_str} IST</code>"
         )
         
         self._send_message(text)
-        logger.info(f"✅ Sent connection restored alert: {service}")
+        logger.info(f"✅ Connection restored: {service}")
     
     def send_trade_error(self, leg: str, strike: int, qty: int, reason: str):
         """
         Send critical trade error alert (rate-limited to 1 per 10 sec).
+        Enhanced with emoji formatting and mobile-friendly layout.
         
         Args:
             leg: "BUY CE", "SELL PE", etc.
@@ -823,21 +941,23 @@ class TelegramNotifierTextOnly:
         time_str = datetime.now().strftime("%H:%M:%S")
         
         text = (
-            "❌ <b>TRADE FAILED</b>\n\n"
-            f"Leg: <b>{leg}</b>\n"
-            f"Strike: <b>{strike}</b>\n"
-            f"Qty: {qty}\n\n"
+            "❌ <b>TRADE FAILED</b>\n"
+            "────────────────────────────────\n\n"
+            f"📌 <b>Leg:</b> {leg}\n"
+            f"💹 <b>Strike:</b> {strike}\n"
+            f"📊 <b>Qty:</b> {qty}\n\n"
             f"⚠️  <b>Error:</b>\n{reason}\n\n"
             f"🔴 <b>Action:</b> Manual intervention required\n"
-            f"<code>Time: {time_str}</code>"
+            f"<code>Time: {time_str} IST</code>"
         )
         
         self._send_message(text)
-        logger.error(f"❌ Sent trade error alert: {leg} {strike} - {reason}")
+        logger.error(f"❌ Trade error: {leg} {strike} - {reason}")
     
     def send_data_error(self, issue: str, token: str = None, status: str = None):
         """
         Send data validation error alert (rate-limited to 1 per 10 sec).
+        Enhanced with emoji formatting and mobile-friendly layout.
         
         Args:
             issue: "Missing LTP", "Invalid strike", "Schema violation"
@@ -851,7 +971,8 @@ class TelegramNotifierTextOnly:
         time_str = datetime.now().strftime("%H:%M:%S")
         
         text = (
-            "❌ <b>DATA ERROR</b>\n\n"
+            "❌ <b>DATA ERROR</b>\n"
+            "────────────────────────────────\n\n"
             f"Issue: <b>{issue}</b>\n"
         )
         
@@ -863,11 +984,11 @@ class TelegramNotifierTextOnly:
         
         text += (
             f"\n💡 <b>Recommendation:</b> Check instrument master config\n"
-            f"<code>Time: {time_str}</code>"
+            f"<code>Time: {time_str} IST</code>"
         )
         
         self._send_message(text)
-        logger.error(f"❌ Sent data error alert: {issue}")
+        logger.error(f"❌ Data error: {issue}")
 
     # =============================================================================
     # P&L MILESTONE ALERTS (One-time per milestone)
@@ -877,6 +998,7 @@ class TelegramNotifierTextOnly:
                           cumulative_pnl: float = None):
         """
         Send P&L milestone alert (ONE-TIME per milestone per session).
+        Enhanced with emoji formatting and mobile-friendly layout.
         
         Args:
             milestone_type: "100_PERCENT", "150_PERCENT", "MAX_LOSS"
@@ -920,15 +1042,19 @@ class TelegramNotifierTextOnly:
             emoji = "📊"
             message = f"P&L: <b>₹{current_pnl:+.2f}</b>"
         
-        text = f"{emoji} <b>{heading}</b>\n\n{message}"
+        text = (
+            f"{emoji} <b>{heading}</b>\n"
+            "════════════════════════════════\n\n"
+            f"{message}"
+        )
         
         if cumulative_pnl is not None:
             text += f"\n\n📈 Cumulative (today): <b>₹{cumulative_pnl:+.2f}</b>"
         
-        text += f"\n\n<code>Time: {time_str}</code>"
+        text += f"\n\n<code>Time: {time_str} IST</code>"
         
         self._send_message(text)
-        logger.info(f"{emoji} Sent P&L milestone alert: {milestone_type} @ ₹{current_pnl:+.2f}")
+        logger.info(f"{emoji} P&L Milestone: {milestone_type} @ ₹{current_pnl:+.2f}")
 
     # =============================================================================
     # ENHANCED STARTUP ALERT
@@ -950,19 +1076,21 @@ class TelegramNotifierTextOnly:
         
         # Mode-specific emoji
         mode_emoji = "🔴 LIVE" if trading_mode == "LIVE" else "📄 PAPER"
+        status_emoji = "✅" if status == "CONNECTED" else "🟡"
         
         text = (
-            f"🚀 <b>SYSTEM STARTUP</b>\n\n"
-            f"{mode_emoji}\n"
-            f"Broker: <b>{broker_name}</b>\n"
-            f"Instruments: <b>{instruments_count}</b> loaded\n"
-            f"Status: <b>{status}</b>\n\n"
+            f"🚀 <b>SYSTEM STARTUP</b>\n"
+            f"────────────────────────────────\n\n"
+            f"{mode_emoji} Mode\n"
+            f"🏛️  Broker: <b>{broker_name}</b>\n"
+            f"📊 Instruments: <b>{instruments_count}</b> loaded\n"
+            f"{status_emoji} Status: <b>{status}</b>\n\n"
             f"✅ Ready for trading\n"
-            f"<code>Time: {time_str}</code>"
+            f"<code>Started: {time_str} IST</code>"
         )
         
         self._send_message(text)
-        logger.info(f"✅ Sent system startup alert: {trading_mode} mode via {broker_name}")
+        logger.info(f"✅ System startup: {trading_mode} mode via {broker_name}, {instruments_count} instruments")
 
     # =============================================================================
     # DAILY HEARTBEAT (Session Summary)
@@ -1095,6 +1223,7 @@ class TelegramNotifierTextOnly:
         - Locked legs section with lock reason
         - Cumulative P&L with indicator
         - UTF-8 emojis for visual clarity
+        - Mobile-friendly formatting with separators and timestamps
         """
         with self._lock:
             phase = self.current_phase
@@ -1115,13 +1244,16 @@ class TelegramNotifierTextOnly:
         cum_pnl_emoji = "📈" if cum_pnl >= 0 else "📉"
         
         # Build text with enhanced formatting
-        text = f"📊 <b>POSITION SNAPSHOT</b>\n\n"
-        text += f"<code>Time: {time_str}</code>\n\n"
+        text = (
+            f"📊 <b>POSITION SNAPSHOT</b>\n"
+            "════════════════════════════════════════\n\n"
+            f"<code>Time: {time_str} IST</code>\n\n"
+        )
         
         # Open Legs Section
         if open_legs:
             text += f"🟢 <b>OPEN LEGS ({len(open_legs)})</b>\n"
-            text += "─" * 40 + "\n\n"
+            text += "────────────────────────────────────────\n\n"
             
             # Sort legs: CE first, then PE
             sorted_open = sorted(open_legs, key=lambda x: (x.option_type != "CE", x.strike))
@@ -1149,7 +1281,7 @@ class TelegramNotifierTextOnly:
         # Locked Legs Section
         if locked_legs:
             text += f"🔒 <b>LOCKED LEGS ({len(locked_legs)})</b>\n"
-            text += "─" * 40 + "\n\n"
+            text += "────────────────────────────────────────\n\n"
             
             sorted_locked = sorted(locked_legs, key=lambda x: (x.option_type != "CE", x.strike))
             
@@ -1165,9 +1297,9 @@ class TelegramNotifierTextOnly:
                 )
         
         # Summary Section
-        text += "─" * 40 + "\n"
+        text += "════════════════════════════════════════\n"
         text += f"{cum_pnl_emoji} <b>CUMULATIVE P&L: ₹{cum_pnl:+.2f}</b>\n"
-        text += f"   Open: {len(open_legs)} | Locked: {len(locked_legs)}"
+        text += f"   🟢 Open: {len(open_legs)} | 🔒 Locked: {len(locked_legs)}"
         
         return text
     
@@ -1279,6 +1411,8 @@ class TelegramNotifierTextOnly:
         - Snapshot thread: May delay *subsequent* snapshots
         - Trading threads: ZERO impact - no lock held during I/O
         """
+        logger.info("📊 Snapshot loop started (fixed 30-second intervals during IN_TRADE)")
+        
         while not self._stop_event.is_set():
             try:
                 now = time.time()
@@ -1303,14 +1437,22 @@ class TelegramNotifierTextOnly:
                         
                         # Update last_snapshot timestamp after attempting send
                         # This keeps the 30-sec timer strict
-                        if sent or (now - self._last_snapshot) >= self.interval:
-                            with self._lock:
+                        with self._lock:
+                            if sent or (now - self._last_snapshot) >= self.interval:
                                 self._last_snapshot = now
-                                logger.debug(f"📊 Snapshot sent (fixed 30-sec interval)")
+                                elapsed_sec = int(now - self._last_snapshot)
+                                logger.debug(f"📊 Snapshot sent at fixed 30-sec interval (elapsed: {elapsed_sec}s)")
+                elif not should_send_by_timer and phase == PHASE_IN_TRADE and legs:
+                    # Still in trade but timer not elapsed
+                    remaining = self.interval - elapsed
+                    if remaining < 5 and remaining > 0:
+                        logger.debug(f"📊 Next snapshot in {remaining:.1f}s")
+                        
             except Exception as e:
-                logger.error(f"Snapshot loop error: {e}")
+                logger.error(f"❌ Snapshot loop error: {e}", exc_info=False)
 
             # Sleep briefly to allow quick shutdown and responsive checks
+            # This sleep is 1 second, so we check every 1 second whether interval has elapsed
             time.sleep(1)
 
     # -------------------------
@@ -1333,7 +1475,7 @@ class TelegramNotifierTextOnly:
     def send_exit(self, label: str, price: float, pnl: float = None, reason: str = None,
                   token: str = None) -> None:
         """
-        Legacy exit notification.
+        Legacy exit notification with emoji formatting.
         """
         # Remove from active legs
         if token:
@@ -1354,7 +1496,8 @@ class TelegramNotifierTextOnly:
             pnl_status = "EXIT"
         
         text = (
-            f"🔴 <b>TRADE EXIT</b> {pnl_emoji}\n\n"
+            f"🔴 <b>TRADE EXIT</b> {pnl_emoji}\n"
+            "────────────────────────────────\n\n"
             f"📌 <b>Leg:</b> {label}\n"
             f"💰 <b>Exit Price:</b> <code>₹{price:.2f}</code>\n"
         )
@@ -1371,8 +1514,8 @@ class TelegramNotifierTextOnly:
         
         text += (
             f"\n{cum_emoji} <b>Cumulative P&L:</b> <code>₹{cum_pnl:+.2f}</code>\n"
-            f"📊 <b>Open Positions:</b> {pos_count}\n"
-            f"\n⏰ <code>{time_str}</code>"
+            f"📊 <b>Open Positions:</b> {pos_count}\n\n"
+            f"<code>Time: {time_str} IST</code>"
         )
         
         self._send_message(text)

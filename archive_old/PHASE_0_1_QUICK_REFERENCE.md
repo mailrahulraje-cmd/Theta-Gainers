@@ -1,12 +1,17 @@
-# PHASE 0/1 DEADLOCK DIAGNOSIS - QUICK REFERENCE CARD
+# PHASE 0/1 CRITICAL WINDOW - OPERATIONS QUICK REFERENCE
 
-**Issue:** ISSUE 4 - Phase 0/1 Deadlock in StrategyEngine  
-**Date:** 15 Feb 2026  
-**Status:** ✅ FULLY DIAGNOSED AND DOCUMENTED
+**Status:** ✓ LIVE READY  
+**Last Updated:** 2026-02-15
 
 ---
 
-## 📋 THE 6-QUESTION DIAGNOSIS (Completed)
+## Executive Summary
+
+Automatic failsafe that **prevents missed trades** during NSE market opening (Phase 0/1) when WebSocket disconnects or data goes stale.
+
+---
+
+## OPERATIONS REFERENCE CARD
 
 ### Q1: Which flags control Phase 0/1 transitions?
 **Answer:** 

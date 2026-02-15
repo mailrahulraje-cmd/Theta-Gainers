@@ -1,3 +1,22 @@
+"""
+PaperBroker - Paper trading (backtesting) broker implementation
+
+LOCK ORDERING AND NOTIFIER POLICY:
+==================================
+- self.order_lock (threading.Lock): Protects orders and positions access
+  
+NOTIFIER SAFETY:
+- All notifier calls are executed in SEPARATE DAEMON THREADS (non-blocking)
+- This ensures network I/O delays (Telegram API) do NOT block order execution
+- Threads are spawned INSIDE the lock to ensure data consistency, but the actual
+  network call happens outside the lock (in the daemon thread)
+- The notifier itself uses internal locks only for state tracking, not for API calls
+
+CRITICAL: Phase 0/1 Safety
+- Paper broker is used primarily for testing
+- Lock hold times are minimal: only while updating positions and state
+- Notifier calls (which are I/O intensive) never block the lock
+"""
 import threading
 import uuid
 import csv
@@ -7,7 +26,7 @@ from typing import Dict, List, Optional, Any
 from config import Config
 from utils.logger import logger, trade_logger
 from contract import BrokerProtocol, OrderDict, FeedProtocol
-from core.execution_gateway import get_execution_gateway
+from core.execution_gateway import get_execution_gateway, ExecutionGateway
 
 def ist_now() -> datetime:
     return datetime.now(Config.TZ)
@@ -131,12 +150,21 @@ class PaperBroker:
         # ================================================================
         # Validate order through execution gateway BEFORE placing
         symbol = kwargs.get('symbol', f"Token-{token}")
+        
+        # Infer if this is an entry order based on current positions
+        is_entry = ExecutionGateway.infer_is_entry(
+            symbol=symbol,
+            transaction_type=str(side).upper() if side else 'BUY',
+            positions=self.positions
+        )
+        
         allowed, reason = self.gateway.validate_order(
             symbol=symbol,
             transaction_type=str(side).upper() if side else 'BUY',
             quantity=qty,
             price=price,
-            order_type='MARKET'
+            order_type='MARKET',
+            is_entry=is_entry
         )
         
         if not allowed:

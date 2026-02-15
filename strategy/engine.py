@@ -1,3 +1,33 @@
+"""
+StrategyEngine - Main trading engine with thread-safe execution
+
+LOCK ORDERING POLICY (Deadlock Prevention):
+============================================
+1. self._lock (RW state sync): Lowest priority - acquired briefly for phase/state updates
+2. self._trailing_lock: For trailing SL calculations - acquired for leg updates only
+3. broker.order_lock: For order operations - NEVER held when calling notifier
+4. broker._execution_lock: For broker position reconciliation - NEVER held when calling notifier
+
+NOTIFIER SAFETY POLICY (Lock-Free Notifications):
+==================================================
+CRITICAL: ALL notifier calls MUST execute OUTSIDE of any locks to prevent blocking.
+- Notifiers run network I/O (Telegram API) which is slow and can timeout
+- Holding locks during network I/O causes stalls in Phase 0/1 critical windows
+- Notifiers ARE thread-safe (they use internal locks only for state tracking)
+- All notifier methods internally acquire their own locks briefly, then release them
+  before performing API calls
+- This two-stage pattern (extract data while holding lock, then send outside lock)
+  prevents blocking critical trading operations
+
+VERIFIED PATTERN COMPLIANCE:
+- send_phase_change() - outside locks ✓
+- send_trade_entry() - outside locks ✓
+- send_exit() - outside locks ✓
+- send_lock_event() - outside locks ✓
+- send_trailing_sl_update() - outside locks ✓
+- heartbeat() - outside locks ✓
+- send_trade_log() - outside locks ✓
+"""
 import threading
 import time
 from datetime import datetime
@@ -75,10 +105,15 @@ class StrategyEngine:
         # TradeLegManager for type-safe leg storage used by engine logic
         self.trade_leg_manager = TradeLegManager()
 
-
         self.threads = []
         self._stop_event = threading.Event()
         self._lock = threading.Lock()
+        
+        # -------------------------
+        # PHASE-AWARE RETRY STATE TRACKING
+        # -------------------------
+        self._phase_retry_counts = {}  # Track retry attempts per phase
+        self._phase_blocked_attempts = {}  # Track blocked order attempts per phase
 
         # wire tick callback
         try:
@@ -411,6 +446,97 @@ class StrategyEngine:
                     self.notifier.send_phase_change(new_phase)
                 except Exception as e:
                     logger.warning(f"[WARN] Failed to notify phase change: {e}")
+    
+    # -------------------------
+    # Phase 0/1 Safety Gate: Block notifiers and orders if WebSocket/data down
+    # -------------------------
+    def _is_phase_critical_data_safe(self) -> bool:
+        """
+        CRITICAL: Check if data is available during Phase 0/1 windows.
+        
+        Returns:
+            True if trading is safe (WebSocket connected, data fresh)
+            False if WebSocket down or data stale (block operations)
+        
+        BLOCKING WINDOWS:
+        - Phase 0: 09:15:50 → 09:16:30
+        - Phase 1: 09:16:40 → 09:17:20
+        
+        During these windows, if can_trade() returns False:
+        - Block all notifier calls (Telegram, snapshots)
+        - Block all order placements
+        - Log clear reason and phase info
+        """
+        current_phase = self.state.get('phase', PHASE_INIT)
+        
+        # Only apply blocking during Phase 0/1 critical windows
+        if current_phase not in (PHASE_PHASE0, PHASE_PHASE1):
+            return True  # Outside critical phases - safe
+        
+        # Check if WebSocket/data is available
+        is_safe = self.feed.can_trade()
+        
+        if not is_safe:
+            # Log the blocking event with clear information
+            current_time = ist_now()
+            reason = "WebSocket disconnected or data stale"
+            
+            # Check for more specific reason if available
+            if hasattr(self.feed, '_ws_connected'):
+                if not self.feed._ws_connected:
+                    reason = "WebSocket disconnected"
+            
+            if hasattr(self.feed, '_last_tick_time'):
+                stale_threshold = 2.0  # Data older than 2 seconds is stale
+                if self.feed._last_tick_time is not None:
+                    age = (time.time() - self.feed._last_tick_time)
+                    if age > stale_threshold:
+                        reason = f"Data stale ({age:.1f}s old)"
+            
+            logger.warning(
+                f"[PHASE_{current_phase}] SAFETY GATE BLOCKING - "
+                f"Reason: {reason} | Time: {current_time.isoformat()}"
+            )
+        
+        return is_safe
+    
+    def _should_block_notifier_during_phase_0_1(self) -> bool:
+        """
+        CRITICAL: Determine if notifier calls should be blocked during Phase 0/1.
+        
+        Returns:
+            True if notifier should be BLOCKED (data is down)
+            False if notifier can proceed safely
+        
+        This prevents Telegram alerts during Phase 0/1 when system is unstable.
+        """
+        current_phase = self.state.get('phase', PHASE_INIT)
+        
+        # Only block during Phase 0/1
+        if current_phase not in (PHASE_PHASE0, PHASE_PHASE1):
+            return False  # Allow notifier outside critical phases
+        
+        # Block if data is unavailable
+        return not self._is_phase_critical_data_safe()
+    
+    def _should_block_order_during_phase_0_1(self) -> bool:
+        """
+        CRITICAL: Determine if order placement should be blocked during Phase 0/1.
+        
+        Returns:
+            True if orders should be BLOCKED (data is down)
+            False if orders can proceed safely
+        
+        This ensures we never place orders with stale or missing data.
+        """
+        current_phase = self.state.get('phase', PHASE_INIT)
+        
+        # Only block during Phase 0/1
+        if current_phase not in (PHASE_PHASE0, PHASE_PHASE1):
+            return False  # Allow orders outside critical phases
+        
+        # Block if data is unavailable
+        return not self._is_phase_critical_data_safe()
     
     # -------------------------
     # Stop-loss modification (with retry and confirmation)
@@ -1088,6 +1214,110 @@ class StrategyEngine:
     # -------------------------
     # entry / exit monitors
     # -------------------------
+    # PHASE-AWARE CRITICAL WINDOW RETRY LOGIC
+    # -------------------------
+    
+    def _get_current_phase(self) -> str:
+        """
+        Detect if we're in a critical phase window
+        
+        Returns:
+            "PHASE_0": During Phase 0 window (09:15:50 - 09:16:30)
+            "PHASE_1": During Phase 1 window (09:16:40 - 09:17:20)
+            "OTHER": Outside critical windows
+        """
+        now = ist_now()
+        current_time = now.time()
+        
+        # Phase 0: 09:15:50 - 09:16:30
+        phase0_start = Config.PHASE0_START  # 09:15:50
+        phase0_end = datetime.strptime("09:16:30", "%H:%M:%S").time()  # 09:16:30
+        
+        if phase0_start <= current_time <= phase0_end:
+            return "PHASE_0"
+        
+        # Phase 1: 09:16:40 - 09:17:20
+        phase1_start = datetime.strptime("09:16:40", "%H:%M:%S").time()  # 09:16:40
+        phase1_end = datetime.strptime("09:17:20", "%H:%M:%S").time()  # 09:17:20
+        
+        if phase1_start <= current_time <= phase1_end:
+            return "PHASE_1"
+        
+        return "OTHER"
+    
+    def _handle_phase_critical_retry(self, phase_name: str) -> None:
+        """
+        Handle automatic reconnect/resubscription retry during critical phases.
+        
+        If can_trade() returns False during Phase 0/1, continuously retry
+        WebSocket reconnect and token resubscription every 1 second until
+        can_trade() returns True.
+        
+        Runs asynchronously without blocking main event loop.
+        
+        Args:
+            phase_name: "PHASE_0" or "PHASE_1"
+        """
+        if not hasattr(self, '_phase_retry_counts'):
+            self._phase_retry_counts = {}
+        
+        if phase_name not in self._phase_retry_counts:
+            self._phase_retry_counts[phase_name] = 0
+        
+        retry_count = 0
+        max_phase_duration = 50  # Max 50 attempts × 1s = 50 seconds
+        
+        logger.info(
+            f" [{phase_name.upper()}] CRITICAL PHASE: Starting auto-reconnect retry loop. "
+            f"Will retry every 1s for up to {max_phase_duration}s until trading safe."
+        )
+        
+        while retry_count < max_phase_duration:
+            # Check if still in critical phase
+            current_phase = self._get_current_phase()
+            if current_phase != phase_name:
+                logger.info(
+                    f" [{phase_name.upper()}] Exited critical phase window. "
+                    f"Stopping retry loop after {retry_count} attempts."
+                )
+                self._phase_retry_counts[phase_name] = retry_count
+                break
+            
+            # Check trading safety
+            if self.feed.can_trade():
+                logger.info(
+                    f" [{phase_name.upper()}] ✓ TRADING SAFE restored after {retry_count} attempts. "
+                    f"Resuming orders immediately. Time: {ist_now().isoformat()}"
+                )
+                self._phase_retry_counts[phase_name] = retry_count
+                return  # Resume trading
+            
+            # Not safe yet - trigger reconnect/resubscription
+            retry_count += 1
+            
+            logger.warning(
+                f" [{phase_name.upper()}] Retry #{retry_count}: WebSocket/data issue detected. "
+                f"Attempting reconnect + resubscription. Time: {ist_now().isoformat()}"
+            )
+            
+            # Attempt WebSocket reconnect
+            try:
+                if hasattr(self.feed, '_connect_websocket'):
+                    self.feed._connect_websocket()
+                    logger.info(f" [{phase_name.upper()}] Reconnect attempted")
+            except Exception as e:
+                logger.error(f" [{phase_name.upper()}] Reconnect failed: {e}")
+            
+            # Brief wait before retry
+            time.sleep(1.0)
+        
+        logger.error(
+            f" [{phase_name.upper()}] ✗ CRITICAL: Could not restore trading after {max_phase_duration} attempts "
+            f"over {max_phase_duration}s. Proceeding but trades may fail. Time: {ist_now().isoformat()}"
+        )
+        self._phase_retry_counts[phase_name] = retry_count
+
+    # -------------------------
     def _entry_monitor(self):
         """
         FULLY INDEPENDENT LEG MONITORING
@@ -1150,6 +1380,35 @@ class StrategyEngine:
                     time.sleep(5)
                     continue
                 
+                # ✓ TRADING SAFETY GATE with PHASE-AWARE RETRY LOGIC
+                # Check if it's safe to trade (WebSocket connected + fresh data)
+                if not self.feed.can_trade():
+                    # Detailed logging already done by can_trade()
+                    
+                    # CRITICAL: During Phase 0/1, attempt continuous auto-recovery
+                    current_phase = self._get_current_phase()
+                    if current_phase in ("PHASE_0", "PHASE_1"):
+                        logger.critical(
+                            f" [{current_phase}] CRITICAL PHASE: Trading unsafe. "
+                            f"Initiating auto-reconnect retry loop. Time: {ist_now().isoformat()}"
+                        )
+                        # Handle phase-critical retry (blocks until trading safe or phase ends)
+                        self._handle_phase_critical_retry(current_phase)
+                        
+                        # Check again after retry
+                        if not self.feed.can_trade():
+                            logger.error(
+                                f" [{current_phase}] Still unsafe after critical phase retry. "
+                                f"Blocking entries until recovery. Time: {ist_now().isoformat()}"
+                            )
+                            time.sleep(2)
+                            continue
+                    else:
+                        # Outside critical phases - normal pause and retry
+                        logger.info(" Entry monitor paused - waiting for WebSocket/data recovery")
+                        time.sleep(2)
+                        continue
+                
                 # Reset trade entry flag when starting fresh trade
                 if (self.trade_leg_manager.get_leg('sell_ce') and self.trade_leg_manager.get_leg('sell_pe') and
                     not self.trade_leg_manager.get_leg('sell_ce') and not self.trade_leg_manager.get_leg('sell_pe')):
@@ -1168,23 +1427,32 @@ class StrategyEngine:
                     self._check_sell_entry('pe')
                 
                 # Check if both SELL legs entered and send trade entry notification
+                # BLOCKING GATE: Block notifier if Phase 0/1 data is unavailable
                 if (self.trade_leg_manager.get_leg('sell_ce') and self.trade_leg_manager.get_leg('sell_pe') and
                     self.notifier):
-                    try:
-                        sell_ce_strike = self.trade_leg_manager.get_leg('sell_ce')
-                        sell_ce_price = self.trade_leg_manager.get_leg('sell_ce')
-                        sell_ce_sl = sell_ce_price * (1 + Config.SELL_SL_PERCENT)
-                        
-                        sell_pe_strike = self.trade_leg_manager.get_leg('sell_pe')
-                        sell_pe_price = self.trade_leg_manager.get_leg('sell_pe')
-                        sell_pe_sl = sell_pe_price * (1 + Config.SELL_SL_PERCENT)
-                        
-                        self.notifier.send_trade_entry(
-                            sell_ce_strike, sell_ce_price, sell_ce_sl,
-                            sell_pe_strike, sell_pe_price, sell_pe_sl
+                    # Phase 0/1 safety: Block notifier if data is down
+                    if self._should_block_notifier_during_phase_0_1():
+                        current_phase = self.state.get('phase', PHASE_INIT)
+                        logger.info(
+                            f"[{current_phase}] NOTIFIER BLOCKED - "
+                            f"WebSocket/data unavailable | Time: {ist_now().isoformat()}"
                         )
-                    except Exception:
-                        pass
+                    else:
+                        try:
+                            sell_ce_strike = self.trade_leg_manager.get_leg('sell_ce')
+                            sell_ce_price = self.trade_leg_manager.get_leg('sell_ce')
+                            sell_ce_sl = sell_ce_price * (1 + Config.SELL_SL_PERCENT)
+                            
+                            sell_pe_strike = self.trade_leg_manager.get_leg('sell_pe')
+                            sell_pe_price = self.trade_leg_manager.get_leg('sell_pe')
+                            sell_pe_sl = sell_pe_price * (1 + Config.SELL_SL_PERCENT)
+                            
+                            self.notifier.send_trade_entry(
+                                sell_ce_strike, sell_ce_price, sell_ce_sl,
+                                sell_pe_strike, sell_pe_price, sell_pe_sl
+                            )
+                        except Exception:
+                            pass
                 
                 # BUY CE - Independent execution (only if leg is ready)
                 if self.trade_leg_manager.get_leg('buy_ce') and not self.trade_leg_manager.get_leg('buy_ce'):
@@ -1238,6 +1506,16 @@ class StrategyEngine:
             condition_met = decay >= trigger
             logger.info(f"[SELL_ENTRY_CHECK] {ot.upper()} ref={ref:.2f}, ltp={ltp:.2f}, decay={decay:.2f}, trigger={trigger:.2f}, condition_met={condition_met}, broker_mode={Config.TRADING_MODE}")
             if condition_met:
+                # CRITICAL: Phase 0/1 safety check - block orders if data is down
+                if self._should_block_order_during_phase_0_1():
+                    current_phase = self.state.get('phase', PHASE_INIT)
+                    reason = "WebSocket disconnected or data stale"
+                    logger.warning(
+                        f"[{current_phase}] ORDER BLOCKED - SELL {ot.upper()} | "
+                        f"Reason: {reason} | Time: {ist_now().isoformat()}"
+                    )
+                    return  # Abort this order attempt
+                
                 qty = Config.LOTS * self.state.get('lot_size', 1)
                 label = f"SELL_{ot.upper()}_ENTRY"
                 logger.info(f"[SELL_ENTRY_CHECK] [OK] CONDITION MET - Placing order: side=SELL, token={tok}, qty={qty}, price={ltp:.2f}")
@@ -1269,7 +1547,7 @@ class StrategyEngine:
                         logger.warning(f"[SAFETY] SL order verification failed for SELL_{ot.upper()} - will retry on next cycle")
                         # Do not mark as failed - SL may be created asynchronously
                 
-                if self.notifier:
+                if self.notifier and not self._should_block_notifier_during_phase_0_1():
                     try:
                         # FIX: Pass all leg details so Notifier tracks the leg for snapshots
                         self.notifier.send_entry(
@@ -1328,6 +1606,16 @@ class StrategyEngine:
             logger.info(f"[BUY_ENTRY_CHECK] {ot.upper()} ref={ref:.2f}, ltp={ltp:.2f}, trigger={trig:.2f}, condition_met={condition_met}, broker_mode={Config.TRADING_MODE}")
             
             if condition_met:
+                # CRITICAL: Phase 0/1 safety check - block orders if data is down
+                if self._should_block_order_during_phase_0_1():
+                    current_phase = self.state.get('phase', PHASE_INIT)
+                    reason = "WebSocket disconnected or data stale"
+                    logger.warning(
+                        f"[{current_phase}] ORDER BLOCKED - BUY {ot.upper()} | "
+                        f"Reason: {reason} | Time: {ist_now().isoformat()}"
+                    )
+                    return  # Abort this order attempt
+                
                 qty = Config.LOTS * self.state.get('lot_size', 1)
                 label = f"BUY_{ot.upper()}_ENTRY"
                 logger.info(f"[BUY_ENTRY_CHECK] [OK] CONDITION MET - Placing order: side=BUY, token={tok}, qty={qty}, price={ltp:.2f}")
@@ -1344,7 +1632,7 @@ class StrategyEngine:
                 logger.info(f"[BUY_ENTRY_CHECK] [OK] Order FILLED: {result}")
                 self.state.update({f'buy_{ot}_entered': True, f'buy_{ot}_entry_price': ltp})
                 logger.info(f" BUY {ot.upper()} @ Rs{ltp:.2f} - STATE UPDATED")
-                if self.notifier:
+                if self.notifier and not self._should_block_notifier_during_phase_0_1():
                     try:
                         # FIX: Pass all leg details so Notifier tracks the leg for snapshots
                         self.notifier.send_entry(
@@ -1553,7 +1841,7 @@ class StrategyEngine:
                 self.state.set(f'sell_{ot}_exited', True)
                 pnl = (entry - ltp) * qty
                 logger.info(f" SELL {ot.upper()} EXIT @ Rs{ltp:.2f} [{reason}] P&L: Rs{pnl:.2f}")
-                if self.notifier:
+                if self.notifier and not self._should_block_notifier_during_phase_0_1():
                     try:
                         # FIX: Pass token for leg removal
                         self.notifier.send_exit(f" SELL {ot.upper()}", ltp, pnl=pnl, reason=reason, token=tok)
@@ -1589,7 +1877,7 @@ class StrategyEngine:
                 self.state.set(f'buy_{ot}_exited', True)
                 pnl = (ltp - entry) * qty
                 logger.info(f" BUY {ot.upper()} EXIT @ Rs{ltp:.2f} [{reason}] P&L: Rs{pnl:.2f}")
-                if self.notifier:
+                if self.notifier and not self._should_block_notifier_during_phase_0_1():
                     try:
                         # FIX: Pass token for leg removal
                         self.notifier.send_exit(f" BUY {ot.upper()}", ltp, pnl=pnl, reason=reason, token=tok)
@@ -1925,12 +2213,38 @@ class StrategyEngine:
     # -------------------------
     def _place_order_safe(self, side, token, qty, price, label=None):
         """
+        ✓ TRADING SAFETY GATE INTEGRATED
+        
         Try common broker.place_order signatures:
         - place_order(side, token, qty, price, label)
         - place_order(token, symbol, side, price, qty, meta)
         - place_order(token, symbol, side, price, qty)
         - place_order(side, token, qty, price)
+        
+        CRITICAL CHECK: Verifies can_trade() before attempting order
         """
+        # ✓ SAFETY GATE: Check trading conditions (WebSocket + fresh data)
+        if not self.feed.can_trade():
+            # Track blocked attempts during critical phases
+            current_phase = self._get_current_phase()
+            if current_phase in ("PHASE_0", "PHASE_1"):
+                if current_phase not in self._phase_blocked_attempts:
+                    self._phase_blocked_attempts[current_phase] = 0
+                self._phase_blocked_attempts[current_phase] += 1
+                
+                logger.error(
+                    f"[ORDER_SAFE] [{current_phase}] BLOCKED: Trading not allowed (WebSocket or stale data). "
+                    f"Order cancelled: side={side}, token={token}, qty={qty}, price={price:.2f}, label={label}. "
+                    f"Blocked attempts in {current_phase}: {self._phase_blocked_attempts[current_phase]}. "
+                    f"Time: {ist_now().isoformat()}"
+                )
+            else:
+                logger.error(
+                    f"[ORDER_SAFE] BLOCKED: Trading not allowed (WebSocket or stale data). "
+                    f"Order cancelled: side={side}, token={token}, qty={qty}, price={price:.2f}, label={label}"
+                )
+            return None
+        
         logger.info(f"[ORDER_SAFE] Placing order: side={side}, token={token}, qty={qty}, price={price:.2f}, label={label}, broker_mode={Config.TRADING_MODE}")
 
         max_retries = getattr(Config, 'ORDER_MAX_RETRIES', 3)

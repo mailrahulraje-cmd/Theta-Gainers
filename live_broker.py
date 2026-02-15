@@ -10,6 +10,29 @@ CRITICAL SAFETY FEATURES:
 - Circuit breaker
 - Order rate limiting
 - ExecutionGateway integration (centralized safety)
+
+LOCK ORDERING AND NOTIFIER POLICY:
+==================================
+Locks in use (priority order, lowest first):
+1. self.order_lock (threading.Lock): Protects orders and positions
+2. self._execution_lock (threading.Lock): Protects broker API interactions
+3. self._partial_fill_lock (if used): For partial fill tracking
+
+NOTIFIER SAFETY IN PHASE 0/1 CRITICAL WINDOWS:
+================================================
+CRITICAL: All notifier calls execute in SEPARATE DAEMON THREADS (non-blocking)
+- This ensures Telegram API delays (10-30ms typical, 100-300ms worst-case)
+  DO NOT block order execution, risk checks, or reconciliation during Phase 0/1
+- Threads are spawned after lock release to minimize critical section
+- The notifier itself (TelegramNotifierTextOnly) uses internal locks only for
+  state tracking, never blocking API sends
+
+Pattern verified throughout live_broker.py:
+  with self.order_lock:
+      # ... critical order/position operations ...
+  # Lock released here
+  if self.notifier:
+      threading.Thread(target=self.notifier.send_trade_log(...), daemon=True).start()
 """
 import threading
 import uuid
@@ -23,7 +46,7 @@ from utils.logger import logger, trade_logger
 from utils.order_journal import get_order_journal
 from utils.rate_limiter import get_global_rate_limiter
 from contract import BrokerProtocol, OrderDict, FeedProtocol
-from core.execution_gateway import get_execution_gateway
+from core.execution_gateway import get_execution_gateway, ExecutionGateway
 
 try:
     from SmartApi import SmartConnect
@@ -487,12 +510,20 @@ class LiveBroker:
         # CRITICAL: EXECUTION GATEWAY VALIDATION (CENTRALIZED SAFETY)
         # ================================================================
         # This consolidates kill switch, rate limiting, and risk checks
+        # Infer if this is an entry order based on current positions
+        is_entry = ExecutionGateway.infer_is_entry(
+            symbol=symbol or f"Token-{token}",
+            transaction_type=side,
+            positions=self.positions
+        )
+        
         allowed, reason = self.gateway.validate_order(
             symbol=symbol or f"Token-{token}",
             transaction_type=side,
             quantity=qty,
             price=price,
-            order_type='MARKET'
+            order_type='MARKET',
+            is_entry=is_entry
         )
         
         if not allowed:

@@ -2000,3 +2000,1943 @@ config.ConfigurationError: =====================================================
 2026-02-15 15:56:02,302 [WARNING] Invalid leg_name: invalid_leg
 2026-02-15 15:56:29,647 [WARNING] Invalid leg_name: invalid_leg
 2026-02-15 16:00:07,657 [WARNING] Invalid leg_name: invalid_leg
+2026-02-15 16:38:45,663 [WARNING] Invalid leg_name: invalid_leg
+2026-02-15 16:40:02,787 [WARNING] Invalid leg_name: invalid_leg
+2026-02-15 16:41:21,194 [WARNING] Invalid leg_name: invalid_leg
+2026-02-15 16:41:34,324 [WARNING] Invalid leg_name: invalid_leg
+2026-02-15 16:45:19,160 [WARNING] Invalid leg_name: invalid_leg
+2026-02-15 16:45:25,934 [WARNING] Invalid leg_name: invalid_leg
+2026-02-15 16:46:16,600 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 16:46:16,664 [INFO] ================================================================================
+2026-02-15 16:46:16,664 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 16:46:16,664 [INFO] ================================================================================
+2026-02-15 16:46:16,876 [INFO]  Time drift: 2.474s
+2026-02-15 16:46:16,876 [INFO]  Time sync OK
+2026-02-15 16:46:16,876 [INFO] ================================================================================
+2026-02-15 16:46:16,876 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 16:46:16,876 [INFO] ================================================================================
+2026-02-15 16:46:17,351 [CRITICAL]  Login failed: object of type 'NoneType' has no len()
+Traceback (most recent call last):
+  File "C:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\main.py", line 222, in login_to_angel_one
+    totp = pyotp.TOTP(Config.TOTP_SECRET).now()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SANU\AppData\Local\Programs\Python\Python311\Lib\site-packages\pyotp\totp.py", line 64, in now
+    return self.generate_otp(self.timecode(datetime.datetime.now()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SANU\AppData\Local\Programs\Python\Python311\Lib\site-packages\pyotp\otp.py", line 35, in generate_otp
+    hasher = hmac.new(self.byte_secret(), self.int_to_bytestring(input), self.digest)
+                      ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SANU\AppData\Local\Programs\Python\Python311\Lib\site-packages\pyotp\otp.py", line 49, in byte_secret
+    missing_padding = len(secret) % 8
+                      ^^^^^^^^^^^
+TypeError: object of type 'NoneType' has no len()
+2026-02-15 16:46:17,354 [INFO] ================================================================================
+2026-02-15 16:46:17,354 [INFO] SHUTDOWN SEQUENCE
+2026-02-15 16:46:17,354 [INFO] ================================================================================
+2026-02-15 16:46:17,354 [INFO] ================================================================================
+2026-02-15 16:46:17,354 [INFO]  SHUTDOWN COMPLETE
+2026-02-15 16:46:17,354 [INFO] ================================================================================
+2026-02-15 16:46:53,383 [WARNING] Invalid leg_name: invalid_leg
+2026-02-15 16:58:22,916 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 16:58:22,945 [INFO] ================================================================================
+2026-02-15 16:58:22,945 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 16:58:22,946 [INFO] ================================================================================
+2026-02-15 16:58:23,087 [INFO]  Time drift: 2.517s
+2026-02-15 16:58:23,087 [INFO]  Time sync OK
+2026-02-15 16:58:23,088 [INFO] ================================================================================
+2026-02-15 16:58:23,089 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 16:58:23,090 [INFO] ================================================================================
+2026-02-15 16:58:23,426 [INFO] Client Code: A300707
+2026-02-15 16:58:23,426 [INFO] TOTP: 577237
+2026-02-15 16:58:24,864 [INFO]  Login successful
+2026-02-15 16:58:24,864 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-15 16:58:24,864 [INFO] ================================================================================
+2026-02-15 16:58:24,880 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-15 16:58:24,880 [INFO] ================================================================================
+2026-02-15 16:58:24,880 [INFO]  LIVE mode - initializing ENHANCED WebSocket
+2026-02-15 16:58:24,880 [INFO]  Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-15 16:58:24,880 [INFO]  Connecting WebSocket...
+2026-02-15 16:58:25,086 [INFO] Websocket connected
+2026-02-15 16:58:25,088 [INFO]  WebSocket connection opened
+2026-02-15 16:58:25,091 [INFO]  WebSocket connected - LTP cache INVALIDATED
+2026-02-15 16:58:25,093 [INFO]  Heartbeat watchdog started (timeout: 30.0s)
+2026-02-15 16:58:25,094 [INFO]  LIVE data feed initialized
+2026-02-15 16:58:25,096 [INFO] ================================================================================
+2026-02-15 16:58:25,097 [INFO] CREATING BROKER: PAPER MODE
+2026-02-15 16:58:25,098 [INFO] ================================================================================
+2026-02-15 16:58:25,100 [INFO] TelegramNotifierTextOnly initialized (interval=60s)
+2026-02-15 16:58:25,101 [INFO]  NOTIFIER PROTOCOL ASSERTION PASSED - all 9 methods verified
+2026-02-15 16:58:28,044 [INFO] TelegramNotifierTextOnly started
+2026-02-15 16:58:28,045 [INFO] ================================================================================
+2026-02-15 16:58:28,046 [INFO]  NOTIFIER PROTOCOL VALIDATED
+2026-02-15 16:58:28,047 [INFO] ================================================================================
+2026-02-15 16:58:28,048 [INFO] All 9 required methods present
+2026-02-15 16:58:28,049 [INFO] ================================================================================
+2026-02-15 16:58:28,051 [INFO]  Telegram notifier started and validated
+2026-02-15 16:58:28,060 [INFO]  PAPER TRADING MODE - Simulated orders only
+2026-02-15 16:58:28,062 [INFO] ======================================================================
+2026-02-15 16:58:28,063 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 16:58:28,065 [INFO] ======================================================================
+2026-02-15 16:58:28,067 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 16:58:28,068 [INFO] Max Daily Loss: 10000.0
+2026-02-15 16:58:28,069 [INFO] Circuit Breaker: ENABLED
+2026-02-15 16:58:28,071 [INFO] Kill Switch: OFF
+2026-02-15 16:58:28,072 [INFO] No New Trades: NO
+2026-02-15 16:58:28,072 [INFO] ======================================================================
+2026-02-15 16:58:28,073 [INFO]  PaperBroker: ExecutionGateway integrated
+2026-02-15 16:58:29,200 [INFO]  Loaded 187043 instruments
+2026-02-15 16:58:29,201 [INFO]  Notifier logging handler attached
+2026-02-15 16:58:30,134 [INFO]  Sent system status: Login=SUCCESS, WS=PENDING
+2026-02-15 16:58:32,689 [INFO] ================================================================================
+2026-02-15 16:58:33,145 [INFO] [OK] NOTIFIER CONTRACT ASSERTION PASSED
+2026-02-15 16:58:33,614 [INFO] ================================================================================
+2026-02-15 16:58:34,069 [INFO] All 9 required methods verified
+2026-02-15 16:58:34,545 [INFO] ================================================================================
+2026-02-15 16:58:34,990 [INFO] [START] Starting strategy...
+2026-02-15 16:58:35,476 [INFO] [SAFETY] Checking broker for open positions on startup...
+2026-02-15 16:58:35,958 [INFO] [SAFETY] No open positions at broker - starting fresh
+2026-02-15 16:58:36,427 [INFO] Market hours detected - skipping standby mode
+2026-02-15 16:58:36,893 [INFO] [PHASE] PHASE TRANSITION: INIT -> CLOSED
+2026-02-15 16:58:36,895 [WARNING]  SQUAREOFF
+2026-02-15 16:58:36,896 [INFO]  16:58:36 | INIT | P&L: Rs0.00 | Pos: 0
+2026-02-15 16:58:36,896 [INFO] [OK] Strategy engine started
+2026-02-15 16:58:37,898 [INFO]  TRAILING STOP-LOSS ACTIVATED (14:15)
+2026-02-15 16:58:38,754 [INFO] ================================================================================
+2026-02-15 16:58:38,996 [INFO]  Sent phase change: None  CLOSED
+2026-02-15 16:58:39,668 [INFO]  STRATEGY RUNNING
+2026-02-15 16:58:40,734 [INFO] ================================================================================
+2026-02-15 16:58:41,188 [INFO] Data Source: LIVE
+2026-02-15 16:58:41,667 [INFO] Trading Mode: PAPER
+2026-02-15 16:58:42,123 [INFO] Press Ctrl+C to stop
+2026-02-15 16:58:42,597 [INFO] ================================================================================
+2026-02-15 16:58:43,286 [INFO]  16:58:43 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 16:58:48,761 [INFO]  16:58:48 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 16:58:54,225 [INFO]  16:58:54 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 16:58:55,095 [WARNING]  No ticks for 30.0s. Forcing reconnect.
+2026-02-15 16:58:55,599 [WARNING] [PATCH] _on_close error (continuing): SmartWebSocketV2._on_close() missing 1 required positional argument: 'wsapp'
+2026-02-15 17:05:40,731 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 18:27:44,280 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 18:27:44,364 [INFO] ================================================================================
+2026-02-15 18:27:44,364 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 18:27:44,365 [INFO] ================================================================================
+2026-02-15 18:27:44,367 [CRITICAL]  FATAL ERROR: ================================================================================
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+Traceback (most recent call last):
+  File "c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\main.py", line 267, in main
+    Config.validate()
+  File "c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\config.py", line 339, in validate
+    raise ConfigurationError(full_msg)
+config.ConfigurationError: ================================================================================
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+ CONFIGURATION VALIDATION FAILED
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+   Instrument CSV not found: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\angel_master_instruments.csv
+=
+2026-02-15 18:27:44,538 [INFO] ================================================================================
+2026-02-15 18:27:44,539 [INFO] SHUTDOWN SEQUENCE
+2026-02-15 18:27:44,539 [INFO] ================================================================================
+2026-02-15 18:27:44,540 [INFO] ================================================================================
+2026-02-15 18:27:44,540 [INFO]  SHUTDOWN COMPLETE
+2026-02-15 18:27:44,542 [INFO] ================================================================================
+2026-02-15 18:28:10,901 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 18:28:10,926 [INFO] ================================================================================
+2026-02-15 18:28:10,926 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 18:28:10,926 [INFO] ================================================================================
+2026-02-15 18:28:11,062 [INFO]  Time drift: 2.560s
+2026-02-15 18:28:11,062 [INFO]  Time sync OK
+2026-02-15 18:28:11,062 [INFO] ================================================================================
+2026-02-15 18:28:11,063 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 18:28:11,063 [INFO] ================================================================================
+2026-02-15 18:28:11,360 [INFO] Client Code: A300707
+2026-02-15 18:28:11,361 [INFO] TOTP: 394391
+2026-02-15 18:28:12,919 [INFO]  Login successful
+2026-02-15 18:28:12,931 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-15 18:28:12,932 [INFO] ================================================================================
+2026-02-15 18:28:12,934 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-15 18:28:12,936 [INFO] ================================================================================
+2026-02-15 18:28:12,938 [INFO]  LIVE mode - initializing ENHANCED WebSocket
+2026-02-15 18:28:12,945 [INFO]  Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-15 18:28:12,947 [INFO]  Connecting WebSocket...
+2026-02-15 18:28:13,127 [INFO] Websocket connected
+2026-02-15 18:28:13,128 [INFO]  WebSocket connection opened
+2026-02-15 18:28:13,132 [INFO]  WebSocket connected - LTP cache INVALIDATED
+2026-02-15 18:28:13,135 [INFO]  Heartbeat watchdog started (timeout: 30.0s)
+2026-02-15 18:28:13,137 [INFO]  LIVE data feed initialized
+2026-02-15 18:28:13,138 [INFO] ================================================================================
+2026-02-15 18:28:13,141 [INFO] CREATING BROKER: PAPER MODE
+2026-02-15 18:28:13,142 [INFO] ================================================================================
+2026-02-15 18:28:13,146 [INFO] TelegramNotifierTextOnly initialized (interval=60s)
+2026-02-15 18:28:13,148 [INFO]  NOTIFIER PROTOCOL ASSERTION PASSED - all 9 methods verified
+2026-02-15 18:28:17,025 [INFO] TelegramNotifierTextOnly started
+2026-02-15 18:28:17,101 [INFO] ================================================================================
+2026-02-15 18:28:17,145 [INFO]  NOTIFIER PROTOCOL VALIDATED
+2026-02-15 18:28:17,145 [INFO] ================================================================================
+2026-02-15 18:28:17,146 [INFO] All 9 required methods present
+2026-02-15 18:28:17,146 [INFO] ================================================================================
+2026-02-15 18:28:17,147 [INFO]  Telegram notifier started and validated
+2026-02-15 18:28:17,151 [INFO]  PAPER TRADING MODE - Simulated orders only
+2026-02-15 18:28:17,154 [INFO] ======================================================================
+2026-02-15 18:28:17,155 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 18:28:17,155 [INFO] ======================================================================
+2026-02-15 18:28:17,156 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 18:28:17,156 [INFO] Max Daily Loss: 10000.0
+2026-02-15 18:28:17,157 [INFO] Circuit Breaker: ENABLED
+2026-02-15 18:28:17,157 [INFO] Kill Switch: OFF
+2026-02-15 18:28:17,157 [INFO] No New Trades: NO
+2026-02-15 18:28:17,158 [INFO] ======================================================================
+2026-02-15 18:28:17,158 [INFO]  PaperBroker: ExecutionGateway integrated
+2026-02-15 18:28:18,669 [INFO]  Loaded 187043 instruments
+2026-02-15 18:28:18,669 [INFO]  Notifier logging handler attached
+2026-02-15 18:28:19,814 [INFO]  Sent system status: Login=SUCCESS, WS=PENDING
+2026-02-15 18:28:22,329 [INFO] ================================================================================
+2026-02-15 18:28:22,868 [INFO] [OK] NOTIFIER CONTRACT ASSERTION PASSED
+2026-02-15 18:28:23,501 [INFO] ================================================================================
+2026-02-15 18:28:24,007 [INFO] All 9 required methods verified
+2026-02-15 18:28:24,627 [INFO] ================================================================================
+2026-02-15 18:28:25,110 [INFO] [START] Starting strategy...
+2026-02-15 18:28:25,759 [INFO] [SAFETY] Checking broker for open positions on startup...
+2026-02-15 18:28:26,243 [INFO] [SAFETY] No open positions at broker - starting fresh
+2026-02-15 18:28:26,777 [INFO] Market hours detected - skipping standby mode
+2026-02-15 18:28:27,260 [INFO] [PHASE] PHASE TRANSITION: INIT -> CLOSED
+2026-02-15 18:28:27,260 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 18:28:27,263 [WARNING]  SQUAREOFF
+2026-02-15 18:28:27,265 [INFO]  18:28:27 | INIT | P&L: Rs0.00 | Pos: 0
+2026-02-15 18:28:27,268 [INFO] [OK] Strategy engine started
+2026-02-15 18:28:28,269 [INFO]  TRAILING STOP-LOSS ACTIVATED (14:15)
+2026-02-15 18:28:28,796 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 18:28:29,602 [INFO]  Sent phase change: None  CLOSED
+2026-02-15 18:28:30,362 [INFO] ================================================================================
+2026-02-15 18:28:32,915 [INFO]  STRATEGY RUNNING
+2026-02-15 18:28:33,433 [INFO] ================================================================================
+2026-02-15 18:28:33,899 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 18:28:34,048 [INFO] Data Source: LIVE
+2026-02-15 18:28:34,535 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 18:28:34,850 [INFO]  18:28:34 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 18:28:35,073 [INFO] Trading Mode: PAPER
+2026-02-15 18:28:37,019 [INFO] Press Ctrl+C to stop
+2026-02-15 18:28:37,530 [INFO] ================================================================================
+2026-02-15 18:28:37,546 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 18:28:38,554 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 18:28:41,067 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 18:28:41,478 [INFO]  18:28:41 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 18:28:41,562 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 18:28:43,136 [WARNING]  No ticks for 30.0s. Forcing reconnect.
+2026-02-15 18:28:43,739 [WARNING] [PATCH] _on_close error (continuing): SmartWebSocketV2._on_close() missing 1 required positional argument: 'wsapp'
+2026-02-15 18:28:44,652 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 18:28:47,138 [INFO]  18:28:47 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 18:28:47,258 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 18:28:50,282 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 18:28:50,842 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 18:28:52,746 [INFO]  18:28:52 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 18:28:53,354 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 18:28:53,741 [WARNING]  No ticks for 40.6s. Forcing reconnect.
+2026-02-15 18:28:53,834 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 18:28:56,929 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 18:28:57,495 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:44:13,668 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 20:44:13,683 [INFO] ================================================================================
+2026-02-15 20:44:13,683 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 20:44:13,683 [INFO] ================================================================================
+2026-02-15 20:44:13,789 [INFO]  Time drift: 2.624s
+2026-02-15 20:44:13,790 [INFO]  Time sync OK
+2026-02-15 20:44:13,790 [INFO] ================================================================================
+2026-02-15 20:44:13,791 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 20:44:13,791 [INFO] ================================================================================
+2026-02-15 20:44:14,281 [INFO] Client Code: A300707
+2026-02-15 20:44:14,293 [INFO] TOTP: 953486
+2026-02-15 20:44:15,917 [INFO]  Login successful
+2026-02-15 20:44:15,917 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-15 20:44:15,923 [INFO] ================================================================================
+2026-02-15 20:44:15,925 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-15 20:44:15,926 [INFO] ================================================================================
+2026-02-15 20:44:15,928 [INFO]  LIVE mode - initializing ENHANCED WebSocket
+2026-02-15 20:44:15,930 [INFO]  Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-15 20:44:15,932 [INFO]  Connecting WebSocket...
+2026-02-15 20:44:16,115 [INFO] Websocket connected
+2026-02-15 20:44:16,121 [INFO]  WebSocket connection opened
+2026-02-15 20:44:16,124 [INFO]  WebSocket connected - LTP cache INVALIDATED
+2026-02-15 20:44:16,126 [INFO]  Heartbeat watchdog started (timeout: 30.0s)
+2026-02-15 20:44:16,128 [INFO]  LIVE data feed initialized
+2026-02-15 20:44:16,129 [INFO] ================================================================================
+2026-02-15 20:44:16,132 [INFO] CREATING BROKER: PAPER MODE
+2026-02-15 20:44:16,133 [INFO] ================================================================================
+2026-02-15 20:44:16,136 [INFO] TelegramNotifierTextOnly initialized (interval=60s)
+2026-02-15 20:44:16,138 [INFO]  NOTIFIER PROTOCOL ASSERTION PASSED - all 9 methods verified
+2026-02-15 20:44:19,494 [INFO] TelegramNotifierTextOnly started
+2026-02-15 20:44:19,495 [INFO] ================================================================================
+2026-02-15 20:44:19,496 [INFO]  NOTIFIER PROTOCOL VALIDATED
+2026-02-15 20:44:19,497 [INFO] ================================================================================
+2026-02-15 20:44:19,499 [INFO] All 9 required methods present
+2026-02-15 20:44:19,499 [INFO] ================================================================================
+2026-02-15 20:44:19,500 [INFO]  Telegram notifier started and validated
+2026-02-15 20:44:19,505 [INFO]  Same day - preserving state
+2026-02-15 20:44:19,512 [INFO]  PAPER TRADING MODE - Simulated orders only
+2026-02-15 20:44:19,516 [INFO] ======================================================================
+2026-02-15 20:44:19,518 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 20:44:19,519 [INFO] ======================================================================
+2026-02-15 20:44:19,521 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 20:44:19,522 [INFO] Max Daily Loss: 10000.0
+2026-02-15 20:44:19,523 [INFO] Circuit Breaker: ENABLED
+2026-02-15 20:44:19,525 [INFO] Kill Switch: OFF
+2026-02-15 20:44:19,526 [INFO] No New Trades: NO
+2026-02-15 20:44:19,527 [INFO] ======================================================================
+2026-02-15 20:44:19,529 [INFO]  PaperBroker: ExecutionGateway integrated
+2026-02-15 20:44:20,827 [INFO]  Loaded 187043 instruments
+2026-02-15 20:44:20,828 [INFO]  Notifier logging handler attached
+2026-02-15 20:44:21,827 [INFO]  Sent system status: Login=SUCCESS, WS=PENDING
+2026-02-15 20:44:24,341 [INFO] ================================================================================
+2026-02-15 20:44:24,900 [INFO] [OK] NOTIFIER CONTRACT ASSERTION PASSED
+2026-02-15 20:44:25,376 [INFO] ================================================================================
+2026-02-15 20:44:25,876 [INFO] All 9 required methods verified
+2026-02-15 20:44:26,949 [INFO] ================================================================================
+2026-02-15 20:44:27,427 [INFO] [START] Starting strategy...
+2026-02-15 20:44:27,969 [INFO] [SAFETY] Checking broker for open positions on startup...
+2026-02-15 20:44:28,586 [INFO] [SAFETY] No open positions at broker - starting fresh
+2026-02-15 20:44:29,097 [INFO] Market hours detected - skipping standby mode
+2026-02-15 20:44:30,124 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:44:30,130 [INFO]  20:44:30 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:44:30,133 [INFO] [OK] Strategy engine started
+2026-02-15 20:44:30,619 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:44:31,134 [INFO]  TRAILING STOP-LOSS ACTIVATED (14:15)
+2026-02-15 20:44:31,646 [INFO] ================================================================================
+2026-02-15 20:44:33,153 [INFO]  STRATEGY RUNNING
+2026-02-15 20:44:33,704 [INFO] ================================================================================
+2026-02-15 20:44:34,172 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:44:34,192 [INFO] Data Source: LIVE
+2026-02-15 20:44:34,730 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:44:35,193 [INFO] Trading Mode: PAPER
+2026-02-15 20:44:36,089 [INFO]  20:44:36 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:44:36,250 [INFO] Press Ctrl+C to stop
+2026-02-15 20:44:37,359 [INFO] ================================================================================
+2026-02-15 20:44:37,753 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:44:38,417 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:44:41,441 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:44:41,881 [INFO]  20:44:41 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:44:41,986 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:44:45,127 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:44:45,686 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:44:46,131 [WARNING]  No ticks for 30.0s. Forcing reconnect.
+2026-02-15 20:44:46,758 [WARNING] [PATCH] _on_close error (continuing): SmartWebSocketV2._on_close() missing 1 required positional argument: 'wsapp'
+2026-02-15 20:44:47,512 [INFO]  20:44:47 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:44:48,186 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:44:48,722 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:44:51,271 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:44:51,832 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:44:53,042 [INFO]  20:44:53 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:44:54,315 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:44:54,903 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:44:56,759 [WARNING]  No ticks for 40.6s. Forcing reconnect.
+2026-02-15 20:44:57,906 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:44:58,571 [INFO]  20:44:58 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:44:58,637 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:45:01,716 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:45:02,273 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:45:04,203 [INFO]  20:45:04 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:45:04,753 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:45:05,751 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:45:07,243 [WARNING]  No ticks for 51.1s. Forcing reconnect.
+2026-02-15 20:45:08,371 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:45:09,034 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:45:09,733 [INFO]  20:45:09 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:45:11,530 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:45:12,010 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:57:39,097 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 20:57:39,123 [INFO] ================================================================================
+2026-02-15 20:57:39,124 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 20:57:39,124 [INFO] ================================================================================
+2026-02-15 20:57:39,227 [INFO]  Time drift: 2.633s
+2026-02-15 20:57:39,227 [INFO]  Time sync OK
+2026-02-15 20:57:39,227 [INFO] ================================================================================
+2026-02-15 20:57:39,227 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 20:57:39,228 [INFO] ================================================================================
+2026-02-15 20:57:39,568 [INFO] Client Code: A300707
+2026-02-15 20:57:39,569 [INFO] TOTP: 987456
+2026-02-15 20:57:40,903 [INFO] ================================================================================
+2026-02-15 20:57:40,903 [INFO]  SHUTDOWN INITIATED (Ctrl+C)
+2026-02-15 20:57:40,904 [INFO] ================================================================================
+2026-02-15 20:57:40,910 [INFO] ================================================================================
+2026-02-15 20:57:40,910 [INFO] SHUTDOWN SEQUENCE
+2026-02-15 20:57:40,911 [INFO] ================================================================================
+2026-02-15 20:57:40,911 [INFO] ================================================================================
+2026-02-15 20:57:40,912 [INFO]  SHUTDOWN COMPLETE
+2026-02-15 20:57:40,913 [INFO] ================================================================================
+2026-02-15 20:57:42,317 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 20:57:42,347 [INFO] ================================================================================
+2026-02-15 20:57:42,347 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 20:57:42,365 [INFO] ================================================================================
+2026-02-15 20:57:42,471 [INFO]  Time drift: 2.636s
+2026-02-15 20:57:42,471 [INFO]  Time sync OK
+2026-02-15 20:57:42,472 [INFO] ================================================================================
+2026-02-15 20:57:42,472 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 20:57:42,473 [INFO] ================================================================================
+2026-02-15 20:57:42,818 [INFO] Client Code: A300707
+2026-02-15 20:57:42,818 [INFO] TOTP: 987456
+2026-02-15 20:57:44,131 [INFO]  Login successful
+2026-02-15 20:57:44,131 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-15 20:57:44,131 [INFO] ================================================================================
+2026-02-15 20:57:44,131 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-15 20:57:44,131 [INFO] ================================================================================
+2026-02-15 20:57:44,131 [INFO]  LIVE mode - initializing ENHANCED WebSocket
+2026-02-15 20:57:44,131 [INFO]  Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-15 20:57:44,131 [INFO]  Connecting WebSocket...
+2026-02-15 20:57:44,326 [INFO] Websocket connected
+2026-02-15 20:57:44,326 [INFO]  WebSocket connection opened
+2026-02-15 20:57:44,326 [INFO]  WebSocket connected - LTP cache INVALIDATED
+2026-02-15 20:57:44,326 [INFO]  Heartbeat watchdog started (timeout: 30.0s)
+2026-02-15 20:57:44,326 [INFO]  LIVE data feed initialized
+2026-02-15 20:57:44,342 [INFO] ================================================================================
+2026-02-15 20:57:44,343 [INFO] CREATING BROKER: PAPER MODE
+2026-02-15 20:57:44,345 [INFO] ================================================================================
+2026-02-15 20:57:44,348 [INFO] TelegramNotifierTextOnly initialized (interval=60s)
+2026-02-15 20:57:44,349 [INFO]  NOTIFIER PROTOCOL ASSERTION PASSED - all 9 methods verified
+2026-02-15 20:57:47,317 [INFO] TelegramNotifierTextOnly started
+2026-02-15 20:57:47,317 [INFO] ================================================================================
+2026-02-15 20:57:47,317 [INFO]  NOTIFIER PROTOCOL VALIDATED
+2026-02-15 20:57:47,317 [INFO] ================================================================================
+2026-02-15 20:57:47,317 [INFO] All 9 required methods present
+2026-02-15 20:57:47,332 [INFO] ================================================================================
+2026-02-15 20:57:47,332 [INFO]  Telegram notifier started and validated
+2026-02-15 20:57:47,332 [INFO]  Same day - preserving state
+2026-02-15 20:57:47,345 [INFO]  PAPER TRADING MODE - Simulated orders only
+2026-02-15 20:57:47,348 [INFO] ======================================================================
+2026-02-15 20:57:47,349 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 20:57:47,351 [INFO] ======================================================================
+2026-02-15 20:57:47,352 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 20:57:47,353 [INFO] Max Daily Loss: 10000.0
+2026-02-15 20:57:47,354 [INFO] Circuit Breaker: ENABLED
+2026-02-15 20:57:47,355 [INFO] Kill Switch: OFF
+2026-02-15 20:57:47,357 [INFO] No New Trades: NO
+2026-02-15 20:57:47,358 [INFO] ======================================================================
+2026-02-15 20:57:47,359 [INFO]  PaperBroker: ExecutionGateway integrated
+2026-02-15 20:57:48,406 [INFO]  Loaded 187043 instruments
+2026-02-15 20:57:48,406 [INFO]  Notifier logging handler attached
+2026-02-15 20:57:49,375 [INFO]  Sent system status: Login=SUCCESS, WS=PENDING
+2026-02-15 20:57:51,877 [INFO] ================================================================================
+2026-02-15 20:57:52,346 [INFO] [OK] NOTIFIER CONTRACT ASSERTION PASSED
+2026-02-15 20:57:52,833 [INFO] ================================================================================
+2026-02-15 20:57:53,318 [INFO] All 9 required methods verified
+2026-02-15 20:57:53,802 [INFO] ================================================================================
+2026-02-15 20:57:54,286 [INFO] [START] Starting strategy...
+2026-02-15 20:57:54,754 [INFO] [SAFETY] Checking broker for open positions on startup...
+2026-02-15 20:57:55,255 [INFO] [SAFETY] No open positions at broker - starting fresh
+2026-02-15 20:57:55,771 [INFO] Market hours detected - skipping standby mode
+2026-02-15 20:57:56,255 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:57:56,255 [INFO]  20:57:56 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:57:56,255 [INFO] [OK] Strategy engine started
+2026-02-15 20:57:56,739 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:57:57,269 [INFO]  TRAILING STOP-LOSS ACTIVATED (14:15)
+2026-02-15 20:57:57,697 [INFO] ================================================================================
+2026-02-15 20:57:59,146 [INFO]  STRATEGY RUNNING
+2026-02-15 20:57:59,684 [INFO] ================================================================================
+2026-02-15 20:58:00,193 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:58:00,193 [INFO] Data Source: LIVE
+2026-02-15 20:58:00,675 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:58:01,146 [INFO] Trading Mode: PAPER
+2026-02-15 20:58:02,189 [INFO] Press Ctrl+C to stop
+2026-02-15 20:58:02,223 [INFO]  20:58:02 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:58:02,694 [INFO] ================================================================================
+2026-02-15 20:58:03,670 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:58:04,179 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:58:06,698 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:58:07,166 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:58:08,178 [INFO]  20:58:08 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:58:09,657 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:58:10,133 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:58:12,628 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:58:13,099 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:58:13,647 [INFO]  20:58:13 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:58:14,340 [WARNING]  No ticks for 30.0s. Forcing reconnect.
+2026-02-15 20:58:14,887 [WARNING] [PATCH] _on_close error (continuing): SmartWebSocketV2._on_close() missing 1 required positional argument: 'wsapp'
+2026-02-15 20:58:15,596 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:58:16,060 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:58:18,542 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:58:19,023 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:58:19,147 [INFO]  20:58:19 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:58:21,503 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:58:21,973 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:58:24,499 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:58:24,888 [WARNING]  No ticks for 40.6s. Forcing reconnect.
+2026-02-15 20:58:24,970 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:58:25,001 [INFO]  20:58:25 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 20:58:27,957 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 20:58:28,423 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 20:58:30,901 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:03,413 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 21:11:03,437 [INFO] ================================================================================
+2026-02-15 21:11:03,440 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 21:11:03,440 [INFO] ================================================================================
+2026-02-15 21:11:03,531 [INFO]  Time drift: 2.649s
+2026-02-15 21:11:03,531 [INFO]  Time sync OK
+2026-02-15 21:11:03,531 [INFO] ================================================================================
+2026-02-15 21:11:03,531 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 21:11:03,531 [INFO] ================================================================================
+2026-02-15 21:11:03,833 [INFO] Client Code: A300707
+2026-02-15 21:11:03,833 [INFO] TOTP: 216930
+2026-02-15 21:11:05,465 [INFO]  Login successful
+2026-02-15 21:11:05,466 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-15 21:11:05,467 [INFO] ================================================================================
+2026-02-15 21:11:05,468 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-15 21:11:05,469 [INFO] ================================================================================
+2026-02-15 21:11:05,471 [INFO]  LIVE mode - initializing ENHANCED WebSocket
+2026-02-15 21:11:05,473 [INFO]  Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-15 21:11:05,475 [INFO]  Connecting WebSocket...
+2026-02-15 21:11:05,662 [INFO] Websocket connected
+2026-02-15 21:11:05,662 [INFO]  WebSocket connection opened
+2026-02-15 21:11:05,678 [INFO]  WebSocket connected - LTP cache INVALIDATED
+2026-02-15 21:11:05,682 [INFO]  Heartbeat watchdog started (timeout: 30.0s)
+2026-02-15 21:11:05,683 [INFO]  LIVE data feed initialized
+2026-02-15 21:11:05,684 [INFO] ================================================================================
+2026-02-15 21:11:05,685 [INFO] CREATING BROKER: PAPER MODE
+2026-02-15 21:11:05,686 [INFO] ================================================================================
+2026-02-15 21:11:05,687 [INFO] TelegramNotifierTextOnly initialized (interval=60s)
+2026-02-15 21:11:05,688 [INFO]  NOTIFIER PROTOCOL ASSERTION PASSED - all 9 methods verified
+2026-02-15 21:11:08,568 [INFO] 📊 Snapshot loop started (fixed 30-second intervals during IN_TRADE)
+2026-02-15 21:11:08,569 [INFO] TelegramNotifierTextOnly started
+2026-02-15 21:11:08,570 [INFO] ================================================================================
+2026-02-15 21:11:08,571 [INFO]  NOTIFIER PROTOCOL VALIDATED
+2026-02-15 21:11:08,572 [INFO] ================================================================================
+2026-02-15 21:11:08,573 [INFO] All 9 required methods present
+2026-02-15 21:11:08,574 [INFO] ================================================================================
+2026-02-15 21:11:08,576 [INFO]  Telegram notifier started and validated
+2026-02-15 21:11:08,578 [INFO]  Same day - preserving state
+2026-02-15 21:11:08,587 [INFO]  PAPER TRADING MODE - Simulated orders only
+2026-02-15 21:11:08,589 [INFO] ======================================================================
+2026-02-15 21:11:08,590 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:11:08,591 [INFO] ======================================================================
+2026-02-15 21:11:08,593 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:11:08,594 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:11:08,595 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:11:08,596 [INFO] Kill Switch: OFF
+2026-02-15 21:11:08,598 [INFO] No New Trades: NO
+2026-02-15 21:11:08,599 [INFO] ======================================================================
+2026-02-15 21:11:08,601 [INFO]  PaperBroker: ExecutionGateway integrated
+2026-02-15 21:11:09,763 [INFO]  Loaded 187043 instruments
+2026-02-15 21:11:09,763 [INFO]  Notifier logging handler attached
+2026-02-15 21:11:10,681 [INFO] 🔄 System status: Login=SUCCESS, WS=PENDING
+2026-02-15 21:11:13,149 [INFO] ================================================================================
+2026-02-15 21:11:13,614 [INFO] [OK] NOTIFIER CONTRACT ASSERTION PASSED
+2026-02-15 21:11:14,068 [INFO] ================================================================================
+2026-02-15 21:11:14,505 [INFO] All 9 required methods verified
+2026-02-15 21:11:14,957 [INFO] ================================================================================
+2026-02-15 21:11:15,435 [INFO] [START] Starting strategy...
+2026-02-15 21:11:15,896 [INFO] [SAFETY] Checking broker for open positions on startup...
+2026-02-15 21:11:16,361 [INFO] [SAFETY] No open positions at broker - starting fresh
+2026-02-15 21:11:16,818 [INFO] Market hours detected - skipping standby mode
+2026-02-15 21:11:17,255 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:17,270 [INFO]  21:11:17 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:11:17,270 [INFO] [OK] Strategy engine started
+2026-02-15 21:11:17,753 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:18,278 [INFO]  TRAILING STOP-LOSS ACTIVATED (14:15)
+2026-02-15 21:11:18,643 [INFO] ================================================================================
+2026-02-15 21:11:19,999 [INFO]  STRATEGY RUNNING
+2026-02-15 21:11:20,451 [INFO] ================================================================================
+2026-02-15 21:11:20,898 [INFO] Data Source: LIVE
+2026-02-15 21:11:21,104 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:21,346 [INFO] Trading Mode: PAPER
+2026-02-15 21:11:21,801 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:22,294 [INFO] Press Ctrl+C to stop
+2026-02-15 21:11:23,189 [INFO]  21:11:23 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:11:23,233 [INFO] ================================================================================
+2026-02-15 21:11:24,754 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:25,208 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:27,883 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:28,329 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:28,723 [INFO]  21:11:28 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:11:30,788 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:31,230 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:33,716 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:34,177 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:34,252 [INFO]  21:11:34 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:11:35,684 [WARNING]  No ticks for 30.0s. Forcing reconnect.
+2026-02-15 21:11:36,166 [WARNING] [PATCH] _on_close error (continuing): SmartWebSocketV2._on_close() missing 1 required positional argument: 'wsapp'
+2026-02-15 21:11:36,644 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:37,093 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:39,545 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:40,002 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:40,108 [INFO]  21:11:40 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:11:42,477 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:42,936 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:45,406 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:45,848 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:45,938 [INFO]  21:11:45 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:11:46,177 [WARNING]  No ticks for 40.5s. Forcing reconnect.
+2026-02-15 21:11:48,304 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:48,754 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:51,235 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:51,677 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:51,762 [INFO]  21:11:51 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:11:54,143 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:54,592 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:57,055 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:11:57,214 [WARNING]  No ticks for 51.6s. Forcing reconnect.
+2026-02-15 21:11:57,509 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:11:57,599 [INFO]  21:11:57 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:00,409 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:00,852 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:03,456 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:03,853 [INFO]  21:12:03 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:03,894 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:06,813 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:07,262 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:07,965 [WARNING]  No ticks for 62.3s. Forcing reconnect.
+2026-02-15 21:12:09,358 [INFO]  21:12:09 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:09,729 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:10,284 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:12,733 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:13,184 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:14,822 [INFO]  21:12:14 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:15,668 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:16,114 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:18,412 [WARNING]  No ticks for 72.7s. Forcing reconnect.
+2026-02-15 21:12:18,564 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:19,321 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:20,299 [INFO]  21:12:20 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:21,772 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:22,236 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:24,698 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:25,148 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:25,748 [INFO]  21:12:25 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:27,614 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:28,063 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:28,877 [WARNING]  No ticks for 83.2s. Forcing reconnect.
+2026-02-15 21:12:30,516 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:30,957 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:31,238 [INFO]  21:12:31 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:33,401 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:33,850 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:36,297 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:36,781 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:36,846 [INFO]  21:12:36 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:39,316 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:39,325 [WARNING]  No ticks for 93.7s. Forcing reconnect.
+2026-02-15 21:12:39,817 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:42,762 [INFO]  21:12:42 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:43,853 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:44,333 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:46,809 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:47,350 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:48,227 [INFO]  21:12:48 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:49,959 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:50,298 [WARNING]  No ticks for 104.6s. Forcing reconnect.
+2026-02-15 21:12:50,402 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:53,328 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:53,685 [INFO]  21:12:53 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:12:53,787 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:56,697 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:12:57,147 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:12:59,243 [INFO]  21:12:59 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:28:58,682 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 21:28:58,696 [INFO] ================================================================================
+2026-02-15 21:28:58,696 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 21:28:58,696 [INFO] ================================================================================
+2026-02-15 21:28:58,798 [INFO]  Time drift: 2.651s
+2026-02-15 21:28:58,799 [INFO]  Time sync OK
+2026-02-15 21:28:58,799 [INFO] ================================================================================
+2026-02-15 21:28:58,800 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 21:28:58,801 [INFO] ================================================================================
+2026-02-15 21:28:59,091 [INFO] Client Code: A300707
+2026-02-15 21:28:59,091 [INFO] TOTP: 864317
+2026-02-15 21:29:00,520 [INFO]  Login successful
+2026-02-15 21:29:00,520 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-15 21:29:00,520 [INFO] ================================================================================
+2026-02-15 21:29:00,520 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-15 21:29:00,520 [INFO] ================================================================================
+2026-02-15 21:29:00,520 [INFO]  LIVE mode - initializing ENHANCED WebSocket
+2026-02-15 21:29:00,537 [INFO]  Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-15 21:29:00,537 [INFO]  Connecting WebSocket...
+2026-02-15 21:29:00,689 [INFO] Websocket connected
+2026-02-15 21:29:00,704 [INFO]  WebSocket connection opened
+2026-02-15 21:29:00,704 [INFO]  WebSocket connected - LTP cache INVALIDATED
+2026-02-15 21:29:00,704 [INFO]  Heartbeat watchdog started (timeout: 30.0s)
+2026-02-15 21:29:00,704 [INFO]  LIVE data feed initialized
+2026-02-15 21:29:00,704 [INFO] ================================================================================
+2026-02-15 21:29:00,711 [INFO] CREATING BROKER: PAPER MODE
+2026-02-15 21:29:00,712 [INFO] ================================================================================
+2026-02-15 21:29:00,714 [INFO] TelegramNotifierTextOnly initialized (interval=30s)
+2026-02-15 21:29:00,715 [INFO]  NOTIFIER PROTOCOL ASSERTION PASSED - all 9 methods verified
+2026-02-15 21:29:03,818 [INFO] 📊 Snapshot loop started (fixed 30-second intervals during IN_TRADE)
+2026-02-15 21:29:03,819 [INFO] TelegramNotifierTextOnly started
+2026-02-15 21:29:03,823 [INFO] ================================================================================
+2026-02-15 21:29:03,825 [INFO]  NOTIFIER PROTOCOL VALIDATED
+2026-02-15 21:29:03,829 [INFO] ================================================================================
+2026-02-15 21:29:03,831 [INFO] All 9 required methods present
+2026-02-15 21:29:03,832 [INFO] ================================================================================
+2026-02-15 21:29:03,833 [INFO]  Telegram notifier started and validated
+2026-02-15 21:29:03,837 [INFO]  Same day - preserving state
+2026-02-15 21:29:03,842 [INFO]  PAPER TRADING MODE - Simulated orders only
+2026-02-15 21:29:03,843 [INFO] ======================================================================
+2026-02-15 21:29:03,844 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:29:03,845 [INFO] ======================================================================
+2026-02-15 21:29:03,846 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:29:03,846 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:29:03,847 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:29:03,848 [INFO] Kill Switch: OFF
+2026-02-15 21:29:03,848 [INFO] No New Trades: NO
+2026-02-15 21:29:03,849 [INFO] ======================================================================
+2026-02-15 21:29:03,850 [INFO]  PaperBroker: ExecutionGateway integrated
+2026-02-15 21:29:04,903 [INFO]  Loaded 187043 instruments
+2026-02-15 21:29:04,904 [INFO]  Notifier logging handler attached
+2026-02-15 21:29:05,911 [INFO] 🔄 System status: Login=SUCCESS, WS=PENDING
+2026-02-15 21:29:08,496 [INFO] ================================================================================
+2026-02-15 21:29:09,290 [INFO] [OK] NOTIFIER CONTRACT ASSERTION PASSED
+2026-02-15 21:29:09,786 [INFO] ================================================================================
+2026-02-15 21:29:10,287 [INFO] All 9 required methods verified
+2026-02-15 21:29:10,802 [INFO] ================================================================================
+2026-02-15 21:29:11,305 [INFO] [START] Starting strategy...
+2026-02-15 21:29:11,820 [INFO] [SAFETY] Checking broker for open positions on startup...
+2026-02-15 21:29:12,366 [INFO] [SAFETY] No open positions at broker - starting fresh
+2026-02-15 21:29:12,868 [INFO] Market hours detected - skipping standby mode
+2026-02-15 21:29:13,381 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:13,384 [INFO]  21:29:13 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:29:13,391 [INFO] [OK] Strategy engine started
+2026-02-15 21:29:13,884 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:14,391 [INFO]  TRAILING STOP-LOSS ACTIVATED (14:15)
+2026-02-15 21:29:14,846 [INFO] ================================================================================
+2026-02-15 21:29:16,318 [INFO]  STRATEGY RUNNING
+2026-02-15 21:29:16,809 [INFO] ================================================================================
+2026-02-15 21:29:17,304 [INFO] Data Source: LIVE
+2026-02-15 21:29:17,340 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:17,796 [INFO] Trading Mode: PAPER
+2026-02-15 21:29:18,286 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:18,789 [INFO] Press Ctrl+C to stop
+2026-02-15 21:29:19,372 [INFO]  21:29:19 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:29:19,803 [INFO] ================================================================================
+2026-02-15 21:29:21,283 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:21,835 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:24,347 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:24,831 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:25,311 [INFO]  21:29:25 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:29:27,316 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:27,800 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:30,286 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:30,709 [WARNING]  No ticks for 30.0s. Forcing reconnect.
+2026-02-15 21:29:30,771 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:30,798 [INFO]  21:29:30 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:29:31,321 [WARNING] [PATCH] _on_close error (continuing): SmartWebSocketV2._on_close() missing 1 required positional argument: 'wsapp'
+2026-02-15 21:29:33,754 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:34,240 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:36,725 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:37,193 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:37,243 [INFO]  21:29:37 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:29:39,694 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:40,177 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:41,323 [WARNING]  No ticks for 40.6s. Forcing reconnect.
+2026-02-15 21:29:42,673 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:43,145 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:43,185 [INFO]  21:29:43 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:29:45,660 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:46,200 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:48,909 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:49,144 [INFO]  21:29:49 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:29:49,404 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:51,809 [WARNING]  No ticks for 51.1s. Forcing reconnect.
+2026-02-15 21:29:52,398 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:52,971 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:54,912 [INFO]  21:29:54 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:29:55,489 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:56,021 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:29:58,552 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:29:59,052 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:30:00,413 [INFO]  21:30:00 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:30:01,563 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:30:02,051 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:30:02,294 [WARNING]  No ticks for 61.6s. Forcing reconnect.
+2026-02-15 21:30:04,540 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:30:05,017 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:30:06,011 [INFO]  21:30:06 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:30:47,339 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 21:30:47,368 [INFO] ================================================================================
+2026-02-15 21:30:47,368 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 21:30:47,369 [INFO] ================================================================================
+2026-02-15 21:30:47,464 [INFO]  Time drift: 2.654s
+2026-02-15 21:30:47,465 [INFO]  Time sync OK
+2026-02-15 21:30:47,465 [INFO] ================================================================================
+2026-02-15 21:30:47,466 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 21:30:47,466 [INFO] ================================================================================
+2026-02-15 21:30:47,764 [INFO] Client Code: A300707
+2026-02-15 21:30:47,764 [INFO] TOTP: 019500
+2026-02-15 21:30:49,151 [INFO]  Login successful
+2026-02-15 21:30:49,152 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-15 21:30:49,153 [INFO] ================================================================================
+2026-02-15 21:30:49,154 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-15 21:30:49,154 [INFO] ================================================================================
+2026-02-15 21:30:49,155 [INFO]  LIVE mode - initializing ENHANCED WebSocket
+2026-02-15 21:30:49,156 [INFO]  Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-15 21:30:49,157 [INFO]  Connecting WebSocket...
+2026-02-15 21:30:49,284 [INFO] Websocket connected
+2026-02-15 21:30:49,284 [INFO]  WebSocket connection opened
+2026-02-15 21:30:49,284 [INFO]  WebSocket connected - LTP cache INVALIDATED
+2026-02-15 21:30:49,284 [INFO]  Heartbeat watchdog started (timeout: 30.0s)
+2026-02-15 21:30:49,284 [INFO]  LIVE data feed initialized
+2026-02-15 21:30:49,297 [INFO] ================================================================================
+2026-02-15 21:30:49,297 [INFO] CREATING BROKER: PAPER MODE
+2026-02-15 21:30:49,297 [INFO] ================================================================================
+2026-02-15 21:30:49,297 [INFO] TelegramNotifierTextOnly initialized (interval=30s)
+2026-02-15 21:30:49,297 [INFO]  NOTIFIER PROTOCOL ASSERTION PASSED - all 9 methods verified
+2026-02-15 21:30:53,063 [INFO] 📊 Snapshot loop started (fixed 30-second intervals during IN_TRADE)
+2026-02-15 21:30:53,063 [INFO] TelegramNotifierTextOnly started
+2026-02-15 21:30:53,063 [INFO] ================================================================================
+2026-02-15 21:30:53,063 [INFO]  NOTIFIER PROTOCOL VALIDATED
+2026-02-15 21:30:53,063 [INFO] ================================================================================
+2026-02-15 21:30:53,063 [INFO] All 9 required methods present
+2026-02-15 21:30:53,063 [INFO] ================================================================================
+2026-02-15 21:30:53,063 [INFO]  Telegram notifier started and validated
+2026-02-15 21:30:53,063 [INFO]  Same day - preserving state
+2026-02-15 21:30:53,063 [INFO]  PAPER TRADING MODE - Simulated orders only
+2026-02-15 21:30:53,063 [INFO] ======================================================================
+2026-02-15 21:30:53,063 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:30:53,075 [INFO] ======================================================================
+2026-02-15 21:30:53,075 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:30:53,076 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:30:53,076 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:30:53,077 [INFO] Kill Switch: OFF
+2026-02-15 21:30:53,077 [INFO] No New Trades: NO
+2026-02-15 21:30:53,078 [INFO] ======================================================================
+2026-02-15 21:30:53,078 [INFO]  PaperBroker: ExecutionGateway integrated
+2026-02-15 21:30:54,147 [INFO]  Loaded 187043 instruments
+2026-02-15 21:30:54,147 [INFO]  Notifier logging handler attached
+2026-02-15 21:30:55,147 [INFO] 🔄 System status: Login=SUCCESS, WS=PENDING
+2026-02-15 21:30:57,624 [INFO] ================================================================================
+2026-02-15 21:30:58,099 [INFO] [OK] NOTIFIER CONTRACT ASSERTION PASSED
+2026-02-15 21:30:58,630 [INFO] ================================================================================
+2026-02-15 21:30:59,098 [INFO] All 9 required methods verified
+2026-02-15 21:30:59,589 [INFO] ================================================================================
+2026-02-15 21:31:00,063 [INFO] [START] Starting strategy...
+2026-02-15 21:31:00,521 [INFO] [SAFETY] Checking broker for open positions on startup...
+2026-02-15 21:31:01,011 [INFO] [SAFETY] No open positions at broker - starting fresh
+2026-02-15 21:31:01,486 [INFO] Market hours detected - skipping standby mode
+2026-02-15 21:31:01,963 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:31:01,963 [INFO]  21:31:01 | CLOSED | P&L: Rs0.00 | Pos: 0
+2026-02-15 21:31:01,963 [INFO] [OK] Strategy engine started
+2026-02-15 21:31:02,461 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:31:02,974 [INFO]  TRAILING STOP-LOSS ACTIVATED (14:15)
+2026-02-15 21:31:03,647 [INFO] ================================================================================
+2026-02-15 21:31:05,073 [INFO]  STRATEGY RUNNING
+2026-02-15 21:31:05,570 [INFO] ================================================================================
+2026-02-15 21:31:06,029 [INFO] Data Source: LIVE
+2026-02-15 21:31:06,128 [WARNING]  TRADING BLOCKED: No tokens subscribed yet.
+2026-02-15 21:31:06,539 [INFO] Trading Mode: PAPER
+2026-02-15 21:31:07,179 [INFO]  Entry monitor paused - waiting for WebSocket/data recovery
+2026-02-15 21:31:07,653 [INFO] Press Ctrl+C to stop
+2026-02-15 21:31:34,567 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 21:31:34,583 [INFO] ================================================================================
+2026-02-15 21:31:34,583 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 21:31:34,583 [INFO] ================================================================================
+2026-02-15 21:31:34,692 [INFO]  Time drift: 2.655s
+2026-02-15 21:31:34,692 [INFO]  Time sync OK
+2026-02-15 21:31:34,692 [INFO] ================================================================================
+2026-02-15 21:31:34,692 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 21:31:34,692 [INFO] ================================================================================
+2026-02-15 21:31:34,959 [INFO] Client Code: A300707
+2026-02-15 21:31:34,959 [INFO] TOTP: 157907
+2026-02-15 21:31:36,261 [INFO]  Login successful
+2026-02-15 21:31:36,261 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-15 21:31:36,261 [INFO] ================================================================================
+2026-02-15 21:31:36,261 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-15 21:31:36,261 [INFO] ================================================================================
+2026-02-15 21:31:36,261 [INFO]  LIVE mode - initializing ENHANCED WebSocket
+2026-02-15 21:31:36,279 [INFO]  Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-15 21:31:36,281 [INFO]  Connecting WebSocket...
+2026-02-15 21:31:36,493 [INFO] Websocket connected
+2026-02-15 21:31:36,508 [INFO]  WebSocket connection opened
+2026-02-15 21:31:36,508 [INFO]  WebSocket connected - LTP cache INVALIDATED
+2026-02-15 21:31:36,508 [INFO]  Heartbeat watchdog started (timeout: 30.0s)
+2026-02-15 21:31:36,517 [INFO]  LIVE data feed initialized
+2026-02-15 21:31:36,518 [INFO] ================================================================================
+2026-02-15 21:31:36,520 [INFO] CREATING BROKER: PAPER MODE
+2026-02-15 21:31:36,521 [INFO] ================================================================================
+2026-02-15 21:31:36,526 [INFO] TelegramNotifierTextOnly initialized (interval=30s)
+2026-02-15 21:31:36,528 [INFO]  NOTIFIER PROTOCOL ASSERTION PASSED - all 9 methods verified
+2026-02-15 21:31:39,476 [INFO] 📊 Snapshot loop started (fixed 30-second intervals during IN_TRADE)
+2026-02-15 21:31:39,476 [INFO] TelegramNotifierTextOnly started
+2026-02-15 21:31:39,478 [INFO] ================================================================================
+2026-02-15 21:31:39,479 [INFO]  NOTIFIER PROTOCOL VALIDATED
+2026-02-15 21:31:39,480 [INFO] ================================================================================
+2026-02-15 21:31:39,482 [INFO] All 9 required methods present
+2026-02-15 21:31:39,483 [INFO] ================================================================================
+2026-02-15 21:31:39,484 [INFO]  Telegram notifier started and validated
+2026-02-15 21:31:39,487 [INFO]  Same day - preserving state
+2026-02-15 21:31:39,496 [INFO]  PAPER TRADING MODE - Simulated orders only
+2026-02-15 21:31:39,498 [INFO] ======================================================================
+2026-02-15 21:31:39,499 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:31:39,500 [INFO] ======================================================================
+2026-02-15 21:31:39,501 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:31:39,502 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:31:39,502 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:31:39,503 [INFO] Kill Switch: OFF
+2026-02-15 21:31:39,503 [INFO] No New Trades: NO
+2026-02-15 21:31:39,504 [INFO] ======================================================================
+2026-02-15 21:31:39,505 [INFO]  PaperBroker: ExecutionGateway integrated
+2026-02-15 21:31:40,543 [INFO]  Loaded 187043 instruments
+2026-02-15 21:31:40,543 [INFO]  Notifier logging handler attached
+2026-02-15 21:31:41,542 [INFO] 🔄 System status: Login=SUCCESS, WS=PENDING
+2026-02-15 21:31:44,061 [INFO] ================================================================================
+2026-02-15 21:31:44,551 [INFO] [OK] NOTIFIER CONTRACT ASSERTION PASSED
+2026-02-15 21:31:45,067 [INFO] ================================================================================
+2026-02-15 21:31:45,574 [INFO] All 9 required methods verified
+2026-02-15 21:31:46,074 [INFO] ================================================================================
+2026-02-15 21:31:46,574 [INFO] [START] Starting strategy...
+2026-02-15 21:31:47,079 [INFO] [SAFETY] Checking broker for open positions on startup...
+2026-02-15 21:31:47,577 [INFO] [SAFETY] No open positions at broker - starting fresh
+2026-02-15 21:31:48,100 [INFO] Market hours detected - skipping standby mode
+2026-02-15 21:32:36,630 [INFO]  SmartWebSocketV2 patched for signature safety
+2026-02-15 21:32:36,645 [INFO] ================================================================================
+2026-02-15 21:32:36,645 [INFO] NIFTY THETA STRATEGY v3.0 - PAPER MODE
+2026-02-15 21:32:36,645 [INFO] ================================================================================
+2026-02-15 21:32:36,751 [INFO]  Time drift: 2.656s
+2026-02-15 21:32:36,751 [INFO]  Time sync OK
+2026-02-15 21:32:36,751 [INFO] ================================================================================
+2026-02-15 21:32:36,752 [INFO]  LOGGING IN TO ANGEL ONE
+2026-02-15 21:32:36,753 [INFO] ================================================================================
+2026-02-15 21:32:37,036 [INFO] Client Code: A300707
+2026-02-15 21:32:37,036 [INFO] TOTP: 825043
+2026-02-15 21:32:38,356 [INFO]  Login successful
+2026-02-15 21:32:38,356 [INFO] Session: Bearer eyJhbGciOiJIU...
+2026-02-15 21:32:38,356 [INFO] ================================================================================
+2026-02-15 21:32:38,356 [INFO] CREATING DATA FEED: LIVE MODE
+2026-02-15 21:32:38,356 [INFO] ================================================================================
+2026-02-15 21:32:38,371 [INFO]  LIVE mode - initializing ENHANCED WebSocket
+2026-02-15 21:32:38,372 [INFO]  Tick recorder: c:\Users\SANU\Desktop\New folder (2)\12 Feb Onwards\trading_system_fixed\tick_data
+2026-02-15 21:32:38,372 [INFO]  Connecting WebSocket...
+2026-02-15 21:32:38,506 [INFO] Websocket connected
+2026-02-15 21:32:38,508 [INFO]  WebSocket connection opened
+2026-02-15 21:32:38,510 [INFO]  WebSocket connected - LTP cache INVALIDATED
+2026-02-15 21:32:38,511 [INFO]  Heartbeat watchdog started (timeout: 30.0s)
+2026-02-15 21:32:38,512 [INFO]  LIVE data feed initialized
+2026-02-15 21:32:38,512 [INFO] ================================================================================
+2026-02-15 21:32:38,513 [INFO] CREATING BROKER: PAPER MODE
+2026-02-15 21:32:38,514 [INFO] ================================================================================
+2026-02-15 21:32:38,515 [INFO] TelegramNotifierTextOnly initialized (interval=30s)
+2026-02-15 21:32:38,515 [INFO]  NOTIFIER PROTOCOL ASSERTION PASSED - all 9 methods verified
+2026-02-15 21:32:41,359 [INFO] 📊 Snapshot loop started (fixed 30-second intervals during IN_TRADE)
+2026-02-15 21:32:41,359 [INFO] TelegramNotifierTextOnly started
+2026-02-15 21:32:41,361 [INFO] ================================================================================
+2026-02-15 21:32:41,362 [INFO]  NOTIFIER PROTOCOL VALIDATED
+2026-02-15 21:32:41,364 [INFO] ================================================================================
+2026-02-15 21:32:41,365 [INFO] All 9 required methods present
+2026-02-15 21:32:41,366 [INFO] ================================================================================
+2026-02-15 21:32:41,367 [INFO]  Telegram notifier started and validated
+2026-02-15 21:32:41,369 [INFO]  Same day - preserving state
+2026-02-15 21:32:41,385 [INFO]  PAPER TRADING MODE - Simulated orders only
+2026-02-15 21:32:41,388 [INFO] ======================================================================
+2026-02-15 21:32:41,391 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:32:41,391 [INFO] ======================================================================
+2026-02-15 21:32:41,392 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:32:41,393 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:32:41,393 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:32:41,394 [INFO] Kill Switch: OFF
+2026-02-15 21:32:41,395 [INFO] No New Trades: NO
+2026-02-15 21:32:41,395 [INFO] ======================================================================
+2026-02-15 21:32:41,395 [INFO]  PaperBroker: ExecutionGateway integrated
+2026-02-15 21:32:42,794 [INFO]  Loaded 187043 instruments
+2026-02-15 21:32:42,806 [INFO]  Notifier logging handler attached
+2026-02-15 21:32:43,738 [INFO] 🔄 System status: Login=SUCCESS, WS=PENDING
+2026-02-15 21:40:30,081 [INFO] ======================================================================
+2026-02-15 21:40:30,083 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,083 [INFO] ======================================================================
+2026-02-15 21:40:30,083 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,084 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,084 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,085 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,085 [INFO] No New Trades: NO
+2026-02-15 21:40:30,085 [INFO] ======================================================================
+2026-02-15 21:40:30,086 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,086 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,090 [INFO] ======================================================================
+2026-02-15 21:40:30,091 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,091 [INFO] ======================================================================
+2026-02-15 21:40:30,091 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,092 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,093 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,093 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,093 [INFO] No New Trades: NO
+2026-02-15 21:40:30,094 [INFO] ======================================================================
+2026-02-15 21:40:30,094 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,095 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,101 [INFO] ======================================================================
+2026-02-15 21:40:30,102 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,102 [INFO] ======================================================================
+2026-02-15 21:40:30,103 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,104 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,104 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,104 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,105 [INFO] No New Trades: NO
+2026-02-15 21:40:30,105 [INFO] ======================================================================
+2026-02-15 21:40:30,106 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,106 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,108 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - 3 critical, 2 degraded
+2026-02-15 21:40:30,110 [INFO] ======================================================================
+2026-02-15 21:40:30,110 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,114 [INFO] ======================================================================
+2026-02-15 21:40:30,114 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,115 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,115 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,115 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,116 [INFO] No New Trades: NO
+2026-02-15 21:40:30,116 [INFO] ======================================================================
+2026-02-15 21:40:30,117 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,117 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,120 [INFO] ======================================================================
+2026-02-15 21:40:30,121 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,121 [INFO] ======================================================================
+2026-02-15 21:40:30,122 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,122 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,123 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,123 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,124 [INFO] No New Trades: NO
+2026-02-15 21:40:30,124 [INFO] ======================================================================
+2026-02-15 21:40:30,125 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,125 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,128 [ERROR] 🚫 ORDER BLOCKED: Feed DEAD - 50 tokens dead
+2026-02-15 21:40:30,133 [INFO] ======================================================================
+2026-02-15 21:40:30,134 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,134 [INFO] ======================================================================
+2026-02-15 21:40:30,135 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,136 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,136 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,136 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,137 [INFO] No New Trades: NO
+2026-02-15 21:40:30,137 [INFO] ======================================================================
+2026-02-15 21:40:30,138 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,138 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,140 [ERROR] 🚫 ORDER BLOCKED: Feed DEAD - 50 tokens dead
+2026-02-15 21:40:30,141 [INFO] ======================================================================
+2026-02-15 21:40:30,142 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,142 [INFO] ======================================================================
+2026-02-15 21:40:30,143 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,144 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,144 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,144 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,147 [INFO] No New Trades: NO
+2026-02-15 21:40:30,147 [INFO] ======================================================================
+2026-02-15 21:40:30,148 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,148 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,150 [ERROR] 🚫 ORDER BLOCKED: Feed DEAD - 50 tokens dead
+2026-02-15 21:40:30,154 [INFO] ======================================================================
+2026-02-15 21:40:30,155 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,155 [INFO] ======================================================================
+2026-02-15 21:40:30,156 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,156 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,157 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,157 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,158 [INFO] No New Trades: NO
+2026-02-15 21:40:30,158 [INFO] ======================================================================
+2026-02-15 21:40:30,159 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,159 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,161 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - 3 critical tokens
+2026-02-15 21:40:30,266 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - 3 critical tokens
+2026-02-15 21:40:30,369 [INFO] ======================================================================
+2026-02-15 21:40:30,370 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,371 [INFO] ======================================================================
+2026-02-15 21:40:30,372 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,373 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,374 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,375 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,375 [INFO] No New Trades: NO
+2026-02-15 21:40:30,376 [INFO] ======================================================================
+2026-02-15 21:40:30,377 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,378 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,386 [INFO] ======================================================================
+2026-02-15 21:40:30,387 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,388 [INFO] ======================================================================
+2026-02-15 21:40:30,389 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,390 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,391 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,398 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,399 [INFO] No New Trades: NO
+2026-02-15 21:40:30,400 [INFO] ======================================================================
+2026-02-15 21:40:30,401 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,402 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,407 [INFO] ======================================================================
+2026-02-15 21:40:30,408 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,410 [INFO] ======================================================================
+2026-02-15 21:40:30,417 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,418 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,418 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,431 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,431 [INFO] No New Trades: NO
+2026-02-15 21:40:30,431 [INFO] ======================================================================
+2026-02-15 21:40:30,431 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,431 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,450 [INFO] ======================================================================
+2026-02-15 21:40:30,450 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,450 [INFO] ======================================================================
+2026-02-15 21:40:30,450 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,450 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,450 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,450 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,450 [INFO] No New Trades: NO
+2026-02-15 21:40:30,464 [INFO] ======================================================================
+2026-02-15 21:40:30,466 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,467 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,504 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - test
+2026-02-15 21:40:30,504 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - test
+2026-02-15 21:40:30,537 [INFO] ======================================================================
+2026-02-15 21:40:30,537 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,537 [INFO] ======================================================================
+2026-02-15 21:40:30,537 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,537 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,537 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,537 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,537 [INFO] No New Trades: NO
+2026-02-15 21:40:30,537 [INFO] ======================================================================
+2026-02-15 21:40:30,537 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,537 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,550 [INFO] ======================================================================
+2026-02-15 21:40:30,551 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,551 [INFO] ======================================================================
+2026-02-15 21:40:30,552 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,553 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,554 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,556 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,556 [INFO] No New Trades: NO
+2026-02-15 21:40:30,556 [INFO] ======================================================================
+2026-02-15 21:40:30,556 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,556 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:40:30,556 [INFO] ======================================================================
+2026-02-15 21:40:30,566 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,567 [INFO] ======================================================================
+2026-02-15 21:40:30,568 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,568 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,569 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,570 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,570 [INFO] No New Trades: NO
+2026-02-15 21:40:30,572 [INFO] ======================================================================
+2026-02-15 21:40:30,575 [INFO] ======================================================================
+2026-02-15 21:40:30,576 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:40:30,577 [INFO] ======================================================================
+2026-02-15 21:40:30,579 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:40:30,580 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:40:30,581 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:40:30,584 [INFO] Kill Switch: OFF
+2026-02-15 21:40:30,585 [INFO] No New Trades: NO
+2026-02-15 21:40:30,585 [INFO] ======================================================================
+2026-02-15 21:40:30,586 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:40:30,589 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - 5 critical tokens
+2026-02-15 21:41:00,713 [INFO] ======================================================================
+2026-02-15 21:41:00,714 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:00,715 [INFO] ======================================================================
+2026-02-15 21:41:00,716 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:00,716 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:00,716 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:00,716 [INFO] Kill Switch: OFF
+2026-02-15 21:41:00,716 [INFO] No New Trades: NO
+2026-02-15 21:41:00,716 [INFO] ======================================================================
+2026-02-15 21:41:00,716 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:00,716 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:00,716 [INFO] ======================================================================
+2026-02-15 21:41:00,716 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:00,716 [INFO] ======================================================================
+2026-02-15 21:41:00,716 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:00,716 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:00,728 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:00,728 [INFO] Kill Switch: OFF
+2026-02-15 21:41:00,729 [INFO] No New Trades: NO
+2026-02-15 21:41:00,729 [INFO] ======================================================================
+2026-02-15 21:41:00,730 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:00,730 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:00,735 [INFO] ======================================================================
+2026-02-15 21:41:00,736 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:00,737 [INFO] ======================================================================
+2026-02-15 21:41:00,737 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:00,738 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:00,738 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:00,739 [INFO] Kill Switch: OFF
+2026-02-15 21:41:00,740 [INFO] No New Trades: NO
+2026-02-15 21:41:00,741 [INFO] ======================================================================
+2026-02-15 21:41:00,741 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:00,742 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:00,747 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - 3 critical, 2 degraded
+2026-02-15 21:41:00,750 [INFO] ======================================================================
+2026-02-15 21:41:00,750 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:00,751 [INFO] ======================================================================
+2026-02-15 21:41:00,751 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:00,752 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:00,752 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:00,753 [INFO] Kill Switch: OFF
+2026-02-15 21:41:00,753 [INFO] No New Trades: NO
+2026-02-15 21:41:00,754 [INFO] ======================================================================
+2026-02-15 21:41:00,755 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:00,755 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:00,758 [INFO] ======================================================================
+2026-02-15 21:41:00,762 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:00,765 [INFO] ======================================================================
+2026-02-15 21:41:00,768 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:00,769 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:00,770 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:00,770 [INFO] Kill Switch: OFF
+2026-02-15 21:41:00,771 [INFO] No New Trades: NO
+2026-02-15 21:41:00,772 [INFO] ======================================================================
+2026-02-15 21:41:00,772 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:00,773 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:00,775 [ERROR] 🚫 ORDER BLOCKED: Feed DEAD - 50 tokens dead
+2026-02-15 21:41:00,778 [INFO] ======================================================================
+2026-02-15 21:41:00,779 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:00,780 [INFO] ======================================================================
+2026-02-15 21:41:00,780 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:00,781 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:00,781 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:00,782 [INFO] Kill Switch: OFF
+2026-02-15 21:41:00,783 [INFO] No New Trades: NO
+2026-02-15 21:41:00,783 [INFO] ======================================================================
+2026-02-15 21:41:00,784 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:00,784 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:00,786 [ERROR] 🚫 ORDER BLOCKED: Feed DEAD - 50 tokens dead
+2026-02-15 21:41:00,788 [INFO] ======================================================================
+2026-02-15 21:41:00,788 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:00,789 [INFO] ======================================================================
+2026-02-15 21:41:00,790 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:00,790 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:00,791 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:00,791 [INFO] Kill Switch: OFF
+2026-02-15 21:41:00,791 [INFO] No New Trades: NO
+2026-02-15 21:41:00,795 [INFO] ======================================================================
+2026-02-15 21:41:00,796 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:00,796 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:00,798 [ERROR] 🚫 ORDER BLOCKED: Feed DEAD - 50 tokens dead
+2026-02-15 21:41:00,802 [INFO] ======================================================================
+2026-02-15 21:41:00,803 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:00,803 [INFO] ======================================================================
+2026-02-15 21:41:00,803 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:00,804 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:00,804 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:00,805 [INFO] Kill Switch: OFF
+2026-02-15 21:41:00,805 [INFO] No New Trades: NO
+2026-02-15 21:41:00,806 [INFO] ======================================================================
+2026-02-15 21:41:00,806 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:00,807 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:00,809 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - 3 critical tokens
+2026-02-15 21:41:00,910 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - 3 critical tokens
+2026-02-15 21:41:01,013 [INFO] ======================================================================
+2026-02-15 21:41:01,013 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:01,013 [INFO] ======================================================================
+2026-02-15 21:41:01,013 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:01,013 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:01,013 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:01,013 [INFO] Kill Switch: OFF
+2026-02-15 21:41:01,013 [INFO] No New Trades: NO
+2026-02-15 21:41:01,013 [INFO] ======================================================================
+2026-02-15 21:41:01,013 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:01,013 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:01,013 [INFO] ======================================================================
+2026-02-15 21:41:01,013 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:01,013 [INFO] ======================================================================
+2026-02-15 21:41:01,013 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:01,013 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:01,013 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:01,013 [INFO] Kill Switch: OFF
+2026-02-15 21:41:01,013 [INFO] No New Trades: NO
+2026-02-15 21:41:01,013 [INFO] ======================================================================
+2026-02-15 21:41:01,013 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:01,013 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:01,029 [INFO] ======================================================================
+2026-02-15 21:41:01,029 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:01,029 [INFO] ======================================================================
+2026-02-15 21:41:01,029 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:01,029 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:01,029 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:01,029 [INFO] Kill Switch: OFF
+2026-02-15 21:41:01,029 [INFO] No New Trades: NO
+2026-02-15 21:41:01,029 [INFO] ======================================================================
+2026-02-15 21:41:01,029 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:01,029 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:01,029 [INFO] ======================================================================
+2026-02-15 21:41:01,029 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:01,029 [INFO] ======================================================================
+2026-02-15 21:41:01,029 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:01,029 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:01,029 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:01,029 [INFO] Kill Switch: OFF
+2026-02-15 21:41:01,029 [INFO] No New Trades: NO
+2026-02-15 21:41:01,046 [INFO] ======================================================================
+2026-02-15 21:41:01,048 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:01,048 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:01,076 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - test
+2026-02-15 21:41:01,077 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - test
+2026-02-15 21:41:01,082 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - test
+2026-02-15 21:41:01,083 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - test
+2026-02-15 21:41:01,114 [INFO] ======================================================================
+2026-02-15 21:41:01,114 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:01,115 [INFO] ======================================================================
+2026-02-15 21:41:01,115 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:01,116 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:01,116 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:01,116 [INFO] Kill Switch: OFF
+2026-02-15 21:41:01,117 [INFO] No New Trades: NO
+2026-02-15 21:41:01,117 [INFO] ======================================================================
+2026-02-15 21:41:01,118 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:01,118 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:01,121 [INFO] ======================================================================
+2026-02-15 21:41:01,121 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:01,121 [INFO] ======================================================================
+2026-02-15 21:41:01,121 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:01,121 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:01,121 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:01,121 [INFO] Kill Switch: OFF
+2026-02-15 21:41:01,121 [INFO] No New Trades: NO
+2026-02-15 21:41:01,121 [INFO] ======================================================================
+2026-02-15 21:41:01,121 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:01,129 [INFO]  ExecutionGateway: Telegram feed alerts ENABLED
+2026-02-15 21:41:01,130 [INFO] ======================================================================
+2026-02-15 21:41:01,131 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:01,131 [INFO] ======================================================================
+2026-02-15 21:41:01,132 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:01,132 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:01,132 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:01,133 [INFO] Kill Switch: OFF
+2026-02-15 21:41:01,133 [INFO] No New Trades: NO
+2026-02-15 21:41:01,134 [INFO] ======================================================================
+2026-02-15 21:41:01,135 [INFO] ======================================================================
+2026-02-15 21:41:01,136 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:41:01,136 [INFO] ======================================================================
+2026-02-15 21:41:01,137 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:41:01,137 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:41:01,138 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:41:01,138 [INFO] Kill Switch: OFF
+2026-02-15 21:41:01,138 [INFO] No New Trades: NO
+2026-02-15 21:41:01,139 [INFO] ======================================================================
+2026-02-15 21:41:01,139 [INFO]  ExecutionGateway: Feed circuit breaker ENABLED
+2026-02-15 21:41:01,142 [WARNING] ⚠️ ENTRY BLOCKED: Feed CRITICAL - 5 critical tokens
+2026-02-15 21:42:13,924 [INFO] ======================================================================
+2026-02-15 21:42:13,924 [INFO]  EXECUTION GATEWAY INITIALIZED
+2026-02-15 21:42:13,924 [INFO] ======================================================================
+2026-02-15 21:42:13,924 [INFO] Rate Limit: 20 orders/minute
+2026-02-15 21:42:13,924 [INFO] Max Daily Loss: 10000.0
+2026-02-15 21:42:13,924 [INFO] Circuit Breaker: ENABLED
+2026-02-15 21:42:13,940 [INFO] Kill Switch: OFF
+2026-02-15 21:42:13,940 [INFO] No New Trades: NO
+2026-02-15 21:42:13,940 [INFO] ======================================================================

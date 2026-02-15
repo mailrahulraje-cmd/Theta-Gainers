@@ -662,23 +662,155 @@ class UnifiedFeed:
         logger.info(f" Heartbeat watchdog started (timeout: {self.HEARTBEAT_TIMEOUT}s)")
     
     def _resubscribe_all(self):
-        """Resubscribe all tokens after reconnect"""
+        """
+        Resubscribe all tokens after reconnect with verification.
+        
+        ✓ HARDENED RECONNECT LOGIC IMPLEMENTED
+        - Verifies each token subscription succeeded
+        - Implements retry mechanism for failed subscriptions
+        - Prevents trading if subscriptions fail completely
+        
+        This function ensures that after a WebSocket reconnection, all tokens
+        must receive confirmed ticks before trading resumes. If any token cannot
+        be verified after retries, self.connected is set to False to block trading.
+        """
         if not self.subscribed_tokens:
             return
         
+        # Call enhanced subscription verification
+        if not self._subscribe_to_saved_tokens():
+            logger.error(" Subscription verification failed - marking connection as broken")
+            self.connected = False
+            if self.tick_callback:
+                try:
+                    self.tick_callback(
+                        'SUBSCRIPTION_FAILED',
+                        'Critical subscriptions could not be verified',
+                        '',
+                        0.0,
+                        ist_now()
+                    )
+                except Exception as e:
+                    logger.exception(f"tick_callback failed during subscription failure: {e}")
+    
+    def _subscribe_to_saved_tokens(self) -> bool:
+        """
+        Subscribe to all saved tokens with verification and retry logic.
+        
+        ✓ SUBSCRIPTION VERIFICATION HARDENING IMPLEMENTED
+        
+        Detailed behavior:
+        - Subscribes to each token in self.subscribed_tokens
+        - Verifies subscription by ensuring self.ltp_cache[token] receives at least one tick
+        - Verification window: 5 seconds per attempt
+        - Retry mechanism: Up to 3 attempts per token
+        - Failure handling: Logs ERROR and prevents trading (parent sets self.connected = False)
+        
+        Returns:
+            bool: True if ALL tokens verified successfully, False otherwise
+        """
+        if not self.subscribed_tokens:
+            logger.info(" No saved tokens to resubscribe")
+            return True
+        
+        logger.info(f" Starting hardened subscription verification for {len(self.subscribed_tokens)} tokens")
+        
+        # Group tokens by exchange
         by_exchange = {}
         for token, (symbol, exchange) in self.subscribed_tokens.items():
             if exchange not in by_exchange:
                 by_exchange[exchange] = []
             by_exchange[exchange].append(token)
         
+        all_verified = True
+        max_retries = 3
+        verification_timeout = 5.0
+        
         for exchange, tokens in by_exchange.items():
+            logger.info(f" Processing {len(tokens)} tokens on exchange {exchange}")
+            
             symbols = {
                 token: self.subscribed_tokens[token][0]
                 for token in tokens
             }
-            self._subscribe_live(tokens, symbols, exchange)
+            
+            # Subscribe tokens
+            try:
+                self._subscribe_live(tokens, symbols, exchange)
+            except Exception as e:
+                logger.error(f" Failed to subscribe tokens on {exchange}: {e}")
+                all_verified = False
+                continue
+            
             time.sleep(0.5)
+            
+            # Verify each token received at least one tick
+            unverified_tokens = []
+            for token in tokens:
+                symbol = symbols.get(str(token), f"Token-{token}")
+                verified = False
+                
+                for attempt in range(1, max_retries + 1):
+                    # Wait for tick with timeout
+                    start_time = time.time()
+                    tick_received = False
+                    
+                    while time.time() - start_time < verification_timeout:
+                        with self.ltp_lock:
+                            if str(token) in self.ltp_cache:
+                                entry = self.ltp_cache[str(token)]
+                                if entry.valid:  # Valid means fresh tick received
+                                    tick_received = True
+                                    break
+                        
+                        time.sleep(0.1)
+                    
+                    if tick_received:
+                        logger.info(f" ✓ Verified {symbol} ({token}) - ticks received")
+                        verified = True
+                        break
+                    else:
+                        logger.warning(
+                            f" Verification attempt {attempt}/{max_retries} failed for "
+                            f"{symbol} ({token}) - no tick within {verification_timeout}s"
+                        )
+                        
+                        if attempt < max_retries:
+                            # Retry subscription
+                            logger.info(f" Retrying subscription for {symbol} ({token})")
+                            try:
+                                self._subscribe_live([token], {str(token): symbol}, exchange)
+                            except Exception as e:
+                                logger.error(f" Retry subscription failed for {symbol}: {e}")
+                            
+                            time.sleep(0.5)
+                
+                if not verified:
+                    logger.error(
+                        f" ✗ CRITICAL: {symbol} ({token}) could not be verified after "
+                        f"{max_retries} attempts - no tick received"
+                    )
+                    unverified_tokens.append((token, symbol))
+                    all_verified = False
+            
+            if unverified_tokens:
+                logger.error(
+                    f" {len(unverified_tokens)} tokens on {exchange} failed verification: "
+                    f"{[s for _, s in unverified_tokens]}"
+                )
+        
+        if all_verified:
+            logger.info(
+                f" ✓ HARDENED SUBSCRIPTION VERIFICATION COMPLETE - "
+                f"All {len(self.subscribed_tokens)} tokens verified successfully"
+            )
+        else:
+            logger.error(
+                f" ✗ HARDENED SUBSCRIPTION VERIFICATION FAILED - "
+                f"Some tokens could not receive ticks. Trading will be blocked."
+            )
+        
+        return all_verified
     
     def _init_replay(self, start_date, end_date, speed):
         """Initialize replay mode"""
@@ -765,25 +897,61 @@ class UnifiedFeed:
     
     def get_ltp(self, token: str, check_freshness: bool = True) -> Optional[float]:
         """
-        Get LTP with MANDATORY freshness validation
+        Get LTP with MANDATORY staleness validation and logging.
         
-        RISK #1 MITIGATION:
-        - Returns None if LTP is INVALID (post-reconnect)
-        - Enforces freshness check
+        ✓ STALE DATA PREVENTION IMPLEMENTED
+        
+        Checks:
+        - LTP must exist in cache
+        - LTP must be marked VALID (not invalidated post-reconnect)
+        - LTP must be fresh (< 10 seconds old) when check_freshness=True
+        
+        RISK #1 MITIGATION: Returns None if LTP is INVALID or stale
+        RISK #4 MITIGATION: Prevents trading on data older than 10 seconds
+        
+        Args:
+            token: Contract token to get LTP for
+            check_freshness: If True, enforce 10-second staleness check
+        
+        Returns:
+            float: Valid LTP value if fresh, None if invalid/stale/missing
         """
+        STALE_DATA_THRESHOLD = 10.0  # 10 seconds max age
+        
         with self.ltp_lock:
             entry = self.ltp_cache.get(str(token))
             
             if entry is None:
                 return None
             
-            # CRITICAL: Check validity
+            # CRITICAL: Check validity (set to False on reconnect)
             if not entry.valid:
                 return None
             
-            # Check freshness
+            # STALE DATA CHECK: Explicit 10-second threshold
             if check_freshness and self.mode == "LIVE":
+                current_time = time.time()
+                data_age = current_time - entry.timestamp
+                
+                # Check against 10-second threshold
+                if data_age > STALE_DATA_THRESHOLD:
+                    # Log WARNING with token and last tick timestamp
+                    last_tick_dt = datetime.fromtimestamp(entry.timestamp)
+                    logger.warning(
+                        f" STALE DATA DETECTED: Token {str(token)} - "
+                        f"Last tick {data_age:.1f}s ago at {last_tick_dt.isoformat()} "
+                        f"(threshold: {STALE_DATA_THRESHOLD}s). Blocking trade."
+                    )
+                    return None
+                
+                # Also check against config freshness threshold if different
                 if not entry.is_fresh(Config.TICK_FRESHNESS_SECONDS):
+                    last_tick_dt = datetime.fromtimestamp(entry.timestamp)
+                    logger.warning(
+                        f" STALE DATA DETECTED: Token {str(token)} - "
+                        f"Last tick {data_age:.1f}s ago at {last_tick_dt.isoformat()} "
+                        f"(config threshold: {Config.TICK_FRESHNESS_SECONDS}s). Blocking trade."
+                    )
                     return None
             
             return entry.value
@@ -838,3 +1006,73 @@ class UnifiedFeed:
         """Quick health check"""
         health = self.get_feed_health()
         return health['status'] == 'OK' and self.connected
+    
+    def can_trade(self) -> bool:
+        """
+        ✓ TRADING SAFETY GATE - Comprehensive check before order execution
+        
+        Returns True only if BOTH conditions are met:
+        1. WebSocket is connected (self.connected == True)
+        2. ALL subscribed tokens have valid, non-stale data
+        
+        RISK #1 MITIGATION: Ensures connection is alive
+        RISK #4 MITIGATION: Ensures all data is fresh (<10 seconds)
+        
+        Returns:
+            bool: True if safe to trade, False if any risk detected
+        """
+        # CHECK 1: WebSocket Connection
+        if not self.connected:
+            logger.warning(
+                f" TRADING BLOCKED: WebSocket disconnected "
+                f"(reconnect_count={self.reconnect_count}). "
+                f"No orders will be placed."
+            )
+            return False
+        
+        # CHECK 2: All Subscribed Tokens Have Fresh Data
+        if not self.subscribed_tokens:
+            # No tokens subscribed yet - cannot trade
+            logger.warning(" TRADING BLOCKED: No tokens subscribed yet.")
+            return False
+        
+        stale_tokens = []
+        missing_tokens = []
+        
+        for token in self.subscribed_tokens.keys():
+            # Call get_ltp with freshness check enabled
+            # Returns None if data is stale or missing
+            ltp = self.get_ltp(str(token), check_freshness=True)
+            
+            if ltp is None:
+                # Determine if stale or missing
+                with self.ltp_lock:
+                    entry = self.ltp_cache.get(str(token))
+                    if entry is None:
+                        missing_tokens.append(str(token))
+                    elif not entry.valid:
+                        missing_tokens.append(str(token))
+                    else:
+                        # Entry exists and is valid, but must be stale
+                        stale_tokens.append(str(token))
+        
+        # Log detailed information about any issues
+        if stale_tokens:
+            logger.warning(
+                f" TRADING BLOCKED: {len(stale_tokens)} token(s) have STALE data "
+                f"(>10 seconds old): {stale_tokens}. "
+                f"Waiting for fresh ticks before trading resumes."
+            )
+            return False
+        
+        if missing_tokens:
+            logger.warning(
+                f" TRADING BLOCKED: {len(missing_tokens)} token(s) missing or invalid "
+                f"data: {missing_tokens}. "
+                f"Waiting for connection/subscriptions to be established."
+            )
+            return False
+        
+        # All checks passed - safe to trade
+        logger.debug(f" ✓ Trading ALLOWED - WebSocket connected + all {len(self.subscribed_tokens)} tokens fresh")
+        return True

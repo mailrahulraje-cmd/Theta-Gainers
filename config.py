@@ -270,8 +270,41 @@ class Config:
     # ===========================
     TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
     TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-    TELEGRAM_SNAPSHOT_INTERVAL = int(os.getenv("TELEGRAM_SNAPSHOT_INTERVAL", "30"))
+    # ⭐ FIXED 30-SECOND SNAPSHOT INTERVAL (Requirement: fixed interval independent of price/P&L)
+    # Override: Set env var TELEGRAM_SNAPSHOT_INTERVAL_OVERRIDE to change
+    _interval_override = os.getenv("TELEGRAM_SNAPSHOT_INTERVAL_OVERRIDE")
+    TELEGRAM_SNAPSHOT_INTERVAL = int(_interval_override) if _interval_override else 30
     TELEGRAM_SNAPSHOT_LINES = int(os.getenv("TELEGRAM_SNAPSHOT_LINES", "60"))
+    
+    # NOTIFICATION ALERT FLAGS (Enable/Disable specific alert types)
+    NOTIFY_STARTUP = os.getenv("NOTIFY_STARTUP", "true").lower() == "true"
+    NOTIFY_ERRORS = os.getenv("NOTIFY_ERRORS", "true").lower() == "true"
+    NOTIFY_ENTRIES = os.getenv("NOTIFY_ENTRIES", "true").lower() == "true"
+    NOTIFY_EXITS = os.getenv("NOTIFY_EXITS", "true").lower() == "true"
+    NOTIFY_SL_CHANGES = os.getenv("NOTIFY_SL_CHANGES", "true").lower() == "true"
+    NOTIFY_PNL_MILESTONES = os.getenv("NOTIFY_PNL_MILESTONES", "true").lower() == "true"
+    NOTIFY_CONNECTION_EVENTS = os.getenv("NOTIFY_CONNECTION_EVENTS", "true").lower() == "true"
+    
+    # P&L MILESTONE THRESHOLDS
+    # Set to 0 to disable a milestone
+    PNL_MILESTONE_100_PERCENT = os.getenv("PNL_MILESTONE_100_PERCENT", "true").lower() == "true"
+    PNL_MILESTONE_150_PERCENT = os.getenv("PNL_MILESTONE_150_PERCENT", "true").lower() == "true"
+    PNL_MAX_DAILY_LOSS_PERCENT = float(os.getenv("PNL_MAX_DAILY_LOSS_PERCENT", "50.0"))  # 50% of capital
+    
+    # PERIODIC SNAPSHOT SETTINGS
+    # Snapshot frequency (in seconds) - only during IN_TRADE phase
+    SNAPSHOT_ONLY_IN_TRADE = os.getenv("SNAPSHOT_ONLY_IN_TRADE", "true").lower() == "true"
+    # Skip snapshot if P&L change since last snapshot is less than threshold
+    SNAPSHOT_PNL_THRESHOLD = float(os.getenv("SNAPSHOT_PNL_THRESHOLD", "10.0"))  # rupees
+    
+    # DAILY HEARTBEAT SETTINGS
+    HEARTBEAT_ENABLED = os.getenv("HEARTBEAT_ENABLED", "true").lower() == "true"
+    # Time to send daily heartbeat (IST, HH:MM format)
+    HEARTBEAT_TIME = os.getenv("HEARTBEAT_TIME", "15:45")
+    
+    # ERROR DEDUPLICATION
+    # Rate limit errors: max 1 alert per N seconds per error type
+    ERROR_RATE_LIMIT_SECONDS = int(os.getenv("ERROR_RATE_LIMIT_SECONDS", "10"))
 
     @classmethod
     def validate(cls):
